@@ -4,7 +4,6 @@ import io
 
 def analyze_metadata(pcap_file):
 
-    print(f"Analyzing PCAP file: {pcap_file[:50]}...")  # Print first 50 bytes for identification
     fileData = io.BytesIO(pcap_file)
 
     packets = rdpcap(fileData)
