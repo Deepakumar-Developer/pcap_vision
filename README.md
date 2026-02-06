@@ -24,8 +24,6 @@ The pipeline follows a seamless three-step process:
 2.  **Processing:** The engine parses the packets using [e.g., Scapy/PyShark] and structures the data into a high-performance dataframe.
 3.  **Visualization:** The analyzed data is rendered into clean, interactive graphs for the end-user.
 
-
-
 ---
 
 ## 🎯 Use Cases
