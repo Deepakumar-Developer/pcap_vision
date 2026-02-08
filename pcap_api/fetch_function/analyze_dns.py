@@ -1,0 +1,50 @@
+from scapy.all import rdpcap, DNS
+from collections import Counter
+import io
+
+def analyze_dns(pcap_file):
+
+    fileData = io.BytesIO(pcap_file)
+
+    packets = rdpcap(fileData)
+
+    query_counts = Counter()
+    resolved_ips = {}  # Domain -> Set of IPs
+
+    for pkt in packets:
+        if pkt.haslayer(DNS):
+            dns = pkt[DNS]
+            
+            # 1. Capture Queries (Requests)
+            if dns.qr == 0:  # qr=0 means it's a Query
+                qname = dns.qd.qname.decode().strip('.')
+                query_counts[qname] += 1
+            
+            # 2. Capture Answers (Responses)
+            elif dns.qr == 1:  # qr=1 means it's a Response
+                if dns.ancount > 0:
+                    # Look through all answer records (DNSRR)
+                    for i in range(dns.ancount):
+                        rr = dns.an[i]
+                        if rr.type == 1:  # Type 1 is an 'A' record (IPv4)
+                            qname = rr.rrname.decode().strip('.')
+                            ip_val = rr.rdata
+                            
+                            if qname not in resolved_ips:
+                                resolved_ips[qname] = set()
+                            resolved_ips[qname].add(ip_val)
+
+    dns_info = [{'domain': domain, 'count': count, 'ips': ", ".join(resolved_ips.get(domain, ["Pending/No Ans"]))} for domain, count in query_counts.items()]
+
+    print(resolved_ips)
+    print("\n--- DNS ANALYSIS (Domain Resolution) ---")
+    print(f"{'Domain Name':<30} | {'Reqs':<5} | {'Resolved IP(s)'}")
+    print("-" * 65)
+
+
+    for domain, count in query_counts.most_common():
+        # Get IPs if we found them, otherwise show 'N/A'
+        ips = ", ".join(resolved_ips.get(domain, ["Pending/No Ans"]))
+        print(f"{domain:<30} | {count:<5} | {ips}")
+
+    return {'msg': 'DNS analysis completed successfully', 'dns_info': dns_info}

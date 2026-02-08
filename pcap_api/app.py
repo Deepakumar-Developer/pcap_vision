@@ -2,15 +2,16 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import sys
 
-
 app = Flask(__name__)
 CORS(app)
 
 @app.route("/")
-def pcap_server():
-    return jsonify({"message": "Server is live!"})
+def index():
+    return jsonify({"message": "PCAP Vision is live!"})
 
-@app.route("/analyze", methods=["POST"])
+@app.get("/test")
+
+@app.route("/analyze", methods=["GET", "POST"])
 def analyze():
     try:
         if 'file' not in request.files:
@@ -22,10 +23,11 @@ def analyze():
         pcap_bytes = file.read()
 
         from fetch_function.analyze import analyze
+        # get limit from query parameters, default to 5 if not provided (parameter is optional)
         limit = request.args.get('limit', default=5, type=int)
         result = analyze(pcap_bytes, limit=limit)
         # Success! Returning JSON instead of HTML
-        return jsonify(result)
+        return jsonify(result), 
 
     except Exception as e:
         # This prints the error to your terminal so you can read it!
@@ -53,8 +55,8 @@ def metadata():
         print(f"CRITICAL ERROR: {str(e)}", file=sys.stderr)
         return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
 
-@app.route("/analyze/ip", methods=["POST"])
-def ip():
+@app.route("/analyze/ipAddress", methods=["POST"])
+def ipAddress():
     try:
         if 'file' not in request.files:
             return jsonify({"error": "No file part in request"}), 400
@@ -74,8 +76,8 @@ def ip():
         print(f"CRITICAL ERROR: {str(e)}", file=sys.stderr)
         return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
 
-@app.route("/analyze/mac", methods=["POST"])
-def mac():
+@app.route("/analyze/macAddress", methods=["POST"])
+def macAddress():
     try:
         if 'file' not in request.files:
             return jsonify({"error": "No file part in request"}), 400
@@ -115,7 +117,28 @@ def getProtocols():
         # This prints the error to your terminal so you can read it!
         print(f"CRITICAL ERROR: {str(e)}", file=sys.stderr)
         return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
+    
+@app.route("/analyze/dns", methods=["POST"])
+def dns():
+    try:
+        if 'file' not in request.files:
+            return jsonify({"error": "No file part in request"}), 400
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({"error": "No selected file"}), 400
+        
+        pcap_bytes = file.read()
 
+        from fetch_function.analyze_dns import analyze_dns
+        result = analyze_dns(pcap_bytes)
+        # Success! Returning JSON instead of HTML
+        return jsonify(result)
+
+    except Exception as e:
+        # This prints the error to your terminal so you can read it!
+        print(f"CRITICAL ERROR: {str(e)}", file=sys.stderr)
+        return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
+    
 if __name__ == "__main__":
     # Change port to 8080 to avoid Mac/System conflicts
     app.run(debug=True, port=8080)
