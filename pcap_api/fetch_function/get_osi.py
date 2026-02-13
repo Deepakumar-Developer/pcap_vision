@@ -1,3 +1,4 @@
+import os
 from scapy.all import rdpcap
 from scapy.layers.l2 import Ether, ARP
 from scapy.layers.dns import DNS
@@ -10,8 +11,16 @@ from scapy.layers.dot11 import Dot11, RadioTap, Dot11Beacon, Dot11ProbeReq
 from scapy.layers.netbios import NetBIOS_DS
 import io
 
-def get_osi(pcap_file):
-    fileData = io.BytesIO(pcap_file)
+def get_osi(pcap_file, type):
+    if type == 'path':
+        if not os.path.exists(pcap_file):
+            raise FileNotFoundError(f"The file at {pcap_file} was not found.")
+        fileData = pcap_file
+    elif type == 'bytes':
+        fileData = io.BytesIO(pcap_file)
+    else:
+        raise ValueError("Invalid type specified. Must be 'path' or 'bytes'.")
+    
     packets = rdpcap(fileData)
 
     if len(packets) > 1000:

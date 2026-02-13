@@ -1,11 +1,20 @@
+import os
 from scapy.all import rdpcap, Raw, Padding
 from scapy.layers.dot11 import RadioTap, Dot11
 import ast 
 import io
 
-def analyzePCAP(pcap_file):
+def analyzePCAP(pcap_file, type):
 
-    fileData = io.BytesIO(pcap_file)
+    if type == 'path':
+        if not os.path.exists(pcap_file):
+            raise FileNotFoundError(f"The file at {pcap_file} was not found.")
+        fileData = pcap_file
+    elif type == 'bytes':
+        fileData = io.BytesIO(pcap_file)
+    else:
+        raise ValueError("Invalid type specified. Must be 'path' or 'bytes'.")
+    
     packets = rdpcap(fileData)
 
     if len(packets) > 1000:

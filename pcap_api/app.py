@@ -11,78 +11,91 @@ def index():
 
 # Endpoint for get pcap using SSH and tshark
 @app.route("/cmd/path", methods=["POST"])
-def getInterfaces():
+def getPath():
     from cmd_function.get_path import get_path
     try:
-        hostname=request.json.get("host"),
-        username=request.json.get("user"),
-        password=request.json.get("pwd"),
+        data = request.get_json()
+        host = data.get('host')
+        user = data.get('user')
+        pwd = data.get('pwd')
+
         result = get_path(
-            hostname=hostname,
-            username=username,
-            password=password
+            hostname=host,
+            username=user,
+            password=pwd
         )
         return jsonify(result), 200
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
 
-@app.route("/cmd/interfaces", methods=["POST"])
-def getInterfaces():
+@app.route("/cmd/interface", methods=["POST"])
+def getInterface():
     from cmd_function.get_interface import get_interfance
     try:
-        hostname=request.json.get("host"),
-        username=request.json.get("user"),
-        password=request.json.get("pwd"),
-        tshark_path=request.json.get("tshark_path")
+        data = request.get_json()
+        host = data.get('host')
+        user = data.get('user')
+        pwd = data.get('pwd')
+        path = data.get('path')
+        
         result = get_interfance(
-            hostname=hostname,
-            username=username,
-            password=password,
-            tshark_path=tshark_path
+            hostname=host,
+            username=user,
+            password=pwd,
+            tshark_path=path
         )
         return jsonify(result), 200
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
     
 @app.route("/cmd/get_pcap", methods=["POST"])
-def getInterfaces():
-    from cmd_function.get_interface import get_interfance
+def getPCAP():
+    from cmd_function.get_pcap import get_pcap
     try:
-        hostname=request.json.get("host"),
-        username=request.json.get("user"),
-        password=request.json.get("pwd"),
-        tshark_path=request.json.get("tshark_path")
-        index = request.json.get("index")
-        result = get_interfance(
-            hostname=hostname,
-            username=username,
-            password=password,
-            tshark_path=tshark_path,
+        data = request.get_json()
+        host=data.get("host")
+        user=data.get("user")
+        pwd=data.get("pwd")
+        path=data.get("path")
+        index = data.get("index")
+
+        result = get_pcap(
+            hostname=host,
+            username=user,
+            password=pwd,
+            tshark_path=path,
             index=index
         )
         return jsonify(result), 200
     except Exception as e:
         return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
     
-
 # Endpoints for validate and analyze PCAP files
 @app.route("/analyze", methods=["POST"])
 def analyze():
-    try:
-        if 'file' not in request.files:
-            return jsonify({"error": "No file part in request"}), 400
-        file = request.files['file']
-        if file.filename == '':
-            return jsonify({"error": "No selected file"}), 400
-        
-        pcap_bytes = file.read()
-
+    try:        
         from fetch_function.analyze import analyzePCAP
-        # get limit from query parameters, default to 5 if not provided (parameter is optional)
-        # limit = request.args.get('limit', default=5, type=int)
-        result = analyzePCAP(pcap_bytes)
-        # Success! Returning JSON instead of HTML
-        return jsonify(result), 200
+        
+        data = request.args.get('type', default='', type=str)  # Get the 'data' query parameter, default to empty JSON string
+        print(data)
+        if data and data.lower() == 'bytes':
+            if 'file' not in request.files:
+                return jsonify({"error": "No file part in request"}), 400
+            file = request.files['file']
+
+            if file.filename == '':
+                return jsonify({"error": "No selected file"}), 400
+            pcap_bytes = file.read()
+            result = analyzePCAP(pcap_bytes, data.lower())
+            return jsonify(result), 200
+        elif data and data.lower() == 'path':
+            path = request.get_json().get('path')
+            if not path:
+                return jsonify({"error": "No path provided in JSON body"}), 400
+            result = analyzePCAP(path, data.lower())
+            return jsonify(result), 200
+        else:
+            return jsonify({"error": "Invalid type specified. Must be 'path' or 'bytes'."}), 400
 
     except ValueError as ve:
         # This catches our custom 1000 packet limit error
@@ -95,20 +108,27 @@ def analyze():
 
 @app.route("/analyze/metadata", methods=["POST"])
 def metadata():
-    try:
-        if 'file' not in request.files:
-            return jsonify({"error": "No file part in request"}), 400
-        file = request.files['file']
-        if file.filename == '':
-            return jsonify({"error": "No selected file"}), 400
-        
-        pcap_bytes = file.read()
-
+    try:        
         from fetch_function.analyze_metadata import analyze_metadata
-        result = analyze_metadata(pcap_bytes)
-        # Success! Returning JSON instead of HTML
-        return jsonify(result), 200
-    
+        
+        data = request.args.get('type', default='', type=str)  # Get the 'data' query parameter, default to empty JSON string
+        if data and data.lower() == 'bytes':
+            if 'file' not in request.files:
+                return jsonify({"error": "No file part in request"}), 400
+        
+            file = request.files['file']
+            if file.filename == '':
+                return jsonify({"error": "No selected file"}), 400
+            pcap_bytes = file.read()
+            result = analyze_metadata(pcap_bytes, type='bytes')
+            return jsonify(result), 200
+        elif data and data.lower() == 'path':
+            path = request.get_json().get('path')
+            if not path:
+                return jsonify({"error": "No path provided in JSON body"}), 400
+            result = analyze_metadata(path, type='path')
+            return jsonify(result), 200
+        
     except ValueError as ve:
         # This catches our custom 1000 packet limit error
         return jsonify({"error": "Validation Error", "details": str(ve)}), 400
@@ -121,19 +141,26 @@ def metadata():
 @app.route("/analyze/ipAddress", methods=["POST"])
 def ipAddress():
     try:
-        if 'file' not in request.files:
-            return jsonify({"error": "No file part in request"}), 400
-        file = request.files['file']
-        if file.filename == '':
-            return jsonify({"error": "No selected file"}), 400
-        
-        pcap_bytes = file.read()
-
         from fetch_function.analyze_ip_endpoints import analyze_ip_endpoints
-        result = analyze_ip_endpoints(pcap_bytes)
-        # Success! Returning JSON instead of HTML
-        return jsonify(result), 200
-    
+
+        data = request.args.get('type', default='', type=str)  # Get the 'data' query parameter, default to empty JSON string
+        if data and data.lower() == 'bytes':
+            if 'file' not in request.files:
+                return jsonify({"error": "No file part in request"}), 400
+        
+            file = request.files['file']
+            if file.filename == '':
+                return jsonify({"error": "No selected file"}), 400
+            pcap_bytes = file.read()
+            result = analyze_ip_endpoints(pcap_bytes, type='bytes')
+            return jsonify(result), 200
+        elif data and data.lower() == 'path':
+            path = request.get_json().get('path')
+            if not path:
+                return jsonify({"error": "No path provided in JSON body"}), 400
+            result = analyze_ip_endpoints(path, type='path')
+            return jsonify(result), 200
+        
     except ValueError as ve:
         # This catches our custom 1000 packet limit error
         return jsonify({"error": "Validation Error", "details": str(ve)}), 400
@@ -146,19 +173,26 @@ def ipAddress():
 @app.route("/analyze/macAddress", methods=["POST"])
 def macAddress():
     try:
-        if 'file' not in request.files:
-            return jsonify({"error": "No file part in request"}), 400
-        file = request.files['file']
-        if file.filename == '':
-            return jsonify({"error": "No selected file"}), 400
-        
-        pcap_bytes = file.read()
-
         from fetch_function.analyze_mac_endpoints import analyze_mac_endpoints
-        result = analyze_mac_endpoints(pcap_bytes)
-        # Success! Returning JSON instead of HTML
-        return jsonify(result), 200
-    
+
+        data = request.args.get('type', default='', type=str)  # Get the 'data' query parameter, default to empty JSON string
+        if data and data.lower() == 'bytes':
+            if 'file' not in request.files:
+                return jsonify({"error": "No file part in request"}), 400
+        
+            file = request.files['file']
+            if file.filename == '':
+                return jsonify({"error": "No selected file"}), 400
+            pcap_bytes = file.read()
+            result = analyze_mac_endpoints(pcap_bytes, type='bytes')
+            return jsonify(result), 200
+        elif data and data.lower() == 'path':
+            path = request.get_json().get('path')
+            if not path:
+                return jsonify({"error": "No path provided in JSON body"}), 400
+            result = analyze_mac_endpoints(path, type='path')
+            return jsonify(result), 200
+        
     except ValueError as ve:
         # This catches our custom 1000 packet limit error
         return jsonify({"error": "Validation Error", "details": str(ve)}), 400
@@ -171,19 +205,26 @@ def macAddress():
 @app.route("/analyze/get_protocols", methods=["POST"])
 def getProtocols():
     try:
-        if 'file' not in request.files:
-            return jsonify({"error": "No file part in request"}), 400
-        file = request.files['file']
-        if file.filename == '':
-            return jsonify({"error": "No selected file"}), 400
-        
-        pcap_bytes = file.read()
-
         from fetch_function.get_pcap_protocol import get_pcap_protocols
-        result = get_pcap_protocols(pcap_bytes)
-        # Success! Returning JSON instead of HTML
-        return jsonify(result), 200
-    
+        
+        data = request.args.get('type', default='', type=str)  # Get the 'data' query parameter, default to empty JSON string
+        if data and data.lower() == 'bytes':
+            if 'file' not in request.files:
+                return jsonify({"error": "No file part in request"}), 400
+        
+            file = request.files['file']
+            if file.filename == '':
+                return jsonify({"error": "No selected file"}), 400
+            pcap_bytes = file.read()
+            result = get_pcap_protocols(pcap_bytes, type='bytes')
+            return jsonify(result), 200
+        elif data and data.lower() == 'path':
+            path = request.get_json().get('path')
+            if not path:
+                return jsonify({"error": "No path provided in JSON body"}), 400
+            result = get_pcap_protocols(path, type='path')
+            return jsonify(result), 200
+        
     except ValueError as ve:
         # This catches our custom 1000 packet limit error
         return jsonify({"error": "Validation Error", "details": str(ve)}), 400
@@ -196,19 +237,25 @@ def getProtocols():
 @app.route("/analyze/dns", methods=["POST"])
 def dns():
     try:
-        if 'file' not in request.files:
-            return jsonify({"error": "No file part in request"}), 400
-        file = request.files['file']
-        if file.filename == '':
-            return jsonify({"error": "No selected file"}), 400
-        
-        pcap_bytes = file.read()
-
         from fetch_function.analyze_dns import analyze_dns
-        result = analyze_dns(pcap_bytes)
-        # Success! Returning JSON instead of HTML
-        return jsonify(result), 200
-    
+        
+        data = request.args.get('type', default='', type=str)  # Get the 'data' query parameter, default to empty JSON string
+        if data and data.lower() == 'bytes':
+            if 'file' not in request.files:
+                return jsonify({"error": "No file part in request"}), 400
+            file = request.files['file']
+            if file.filename == '':
+                return jsonify({"error": "No selected file"}), 400
+            pcap_bytes = file.read()
+            result = analyze_dns(pcap_bytes, type='bytes')
+            return jsonify(result), 200
+        elif data and data.lower() == 'path':
+            path = request.get_json().get('path')
+            if not path:
+                return jsonify({"error": "No path provided in JSON body"}), 400
+            result = analyze_dns(path, type='path')
+            return jsonify(result), 200
+        
     except ValueError as ve:
         # This catches our custom 1000 packet limit error
         return jsonify({"error": "Validation Error", "details": str(ve)}), 400
@@ -221,19 +268,24 @@ def dns():
 @app.route("/analyze/get_osi", methods=["POST"])
 def getOSI():
     try:
-        if 'file' not in request.files:
-            return jsonify({"error": "No file part in request"}), 400
-        file = request.files['file']
-        if file.filename == '':
-            return jsonify({"error": "No selected file"}), 400
+        from fetch_function.get_osi import get_osi        
+        data = request.args.get('type', default='', type=str)  # Get the 'data' query parameter, default to empty JSON string
+        if data and data.lower() == 'bytes':
+            if 'file' not in request.files:
+                return jsonify({"error": "No file part in request"}), 400
+            file = request.files['file']
+            if file.filename == '':
+                return jsonify({"error": "No selected file"}), 400
+            pcap_bytes = file.read()
+            result = get_osi(pcap_bytes, type='bytes')
+            return jsonify(result), 200
+        elif data and data.lower() == 'path':
+            path = request.get_json().get('path')
+            if not path:
+                return jsonify({"error": "No path provided in JSON body"}), 400
+            result = get_osi(path, type='path')
+            return jsonify(result), 200
         
-        pcap_bytes = file.read()
-
-        from fetch_function.get_osi import get_osi
-        result = get_osi(pcap_bytes)
-        # Success! Returning JSON instead of HTML
-        return jsonify(result), 200
-    
     except ValueError as ve:
         # This catches our custom 1000 packet limit error
         return jsonify({"error": "Validation Error", "details": str(ve)}), 400

@@ -2,12 +2,11 @@ import paramiko
 
 def get_path(hostname, username, password):
 
-    # Run the command to list interfaces
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy()) # Automatically add unknown host keys
-    client.connect(hostname, username=username, password=password)
+    client.connect(hostname=hostname, username=username, password=password, timeout=60, look_for_keys=False, allow_agent=False, banner_timeout=200, auth_timeout=60)
 
-    for drive in ['C', 'D', 'E', 'F', 'G']:  # Adjust this list based on your system    
+    for drive in ['C', 'D']: # ['C', 'D', 'E', 'F', 'G']:  # Adjust this list based on your system    
         cmd = f"dir /s /b {drive}:\\tshark.exe"
         stdin, stdout, stderr = client.exec_command(cmd)
         output = stdout.read().decode()

@@ -1,3 +1,4 @@
+import os
 from scapy.all import rdpcap, Ether
 from scapy.layers.inet import IP
 from scapy.layers.dot11 import Dot11, RadioTap
@@ -5,9 +6,16 @@ from scapy.packet import Raw
 from collections import Counter
 import io
 
-def analyze_mac_endpoints(pcap_file):
-
-    fileData = io.BytesIO(pcap_file)
+def analyze_mac_endpoints(pcap_file, type):
+    if type == 'path':
+        if not os.path.exists(pcap_file):
+            raise FileNotFoundError(f"The file at {pcap_file} was not found.")
+        fileData = pcap_file
+    elif type == 'bytes':
+        fileData = io.BytesIO(pcap_file)
+    else:
+        raise ValueError("Invalid type specified. Must be 'path' or 'bytes'.")
+    
     packets = rdpcap(fileData)
 
     if len(packets) > 1000:

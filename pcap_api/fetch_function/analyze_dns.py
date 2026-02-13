@@ -1,11 +1,18 @@
+import os
 from scapy.all import rdpcap, DNS
 from scapy.layers.dot11 import Dot11, RadioTap, Dot11Beacon, Dot11ProbeReq
 from collections import Counter
 import io
 
-def analyze_dns(pcap_file):
-
-    fileData = io.BytesIO(pcap_file)
+def analyze_dns(pcap_file, type):
+    if type == 'path':
+        if not os.path.exists(pcap_file):
+            raise FileNotFoundError(f"The file at {pcap_file} was not found.")
+        fileData = pcap_file
+    elif type == 'bytes':
+        fileData = io.BytesIO(pcap_file)
+    else:
+        raise ValueError("Invalid type specified. Must be 'path' or 'bytes'.")
 
     packets = rdpcap(fileData)
 
