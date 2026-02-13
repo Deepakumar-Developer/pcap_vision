@@ -1,15 +1,24 @@
 from scapy.all import rdpcap
 from scapy.layers.inet import IP
+from scapy.layers.dot11 import RadioTap, Dot11
 from collections import Counter
 import io
 
 def analyze_ip_endpoints(pcap_file):
 
-    print(f"Analyzing PCAP file: {pcap_file[:50]}...")  # Print first 50 bytes for identification
     fileData = io.BytesIO(pcap_file)
 
     packets = rdpcap(fileData)
+
+    if len(packets) > 1000:
+        raise ValueError(f"File too large: {len(packets)} packets. Maximum allowed is 1000.")
     
+    if len(packets) > 0:
+        first_packet = packets[0]
+        # Check if the packet has Wireless-specific layers
+        if first_packet.haslayer(RadioTap) or first_packet.haslayer(Dot11):
+            raise ValueError("Monitor Mode packets detected. Only standard Interface Mode (Ethernet) captures are supported.")
+        
     src_ips = Counter()
     dst_ips = Counter()
     conversations = Counter()

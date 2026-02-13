@@ -1,4 +1,5 @@
 from scapy.all import rdpcap
+from scapy.layers.dot11 import RadioTap, Dot11
 import datetime
 import io
 
@@ -7,6 +8,15 @@ def analyze_metadata(pcap_file):
     fileData = io.BytesIO(pcap_file)
 
     packets = rdpcap(fileData)
+
+    if len(packets) > 1000:
+        raise ValueError(f"File too large: {len(packets)} packets. Maximum allowed is 1000.")
+    
+    if len(packets) > 0:
+        first_packet = packets[0]
+        # Check if the packet has Wireless-specific layers
+        if first_packet.haslayer(RadioTap) or first_packet.haslayer(Dot11):
+            raise ValueError("Monitor Mode packets detected. Only standard Interface Mode (Ethernet) captures are supported.")
     
     # 1. Basic Stats
     total_packets = len(packets)

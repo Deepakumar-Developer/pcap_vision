@@ -1,16 +1,23 @@
 from scapy.all import rdpcap, Raw, Padding
+from scapy.layers.dot11 import RadioTap, Dot11
 import ast 
 import io
 
-def analyze(pcap_file,limit):
+def analyzePCAP(pcap_file):
 
     fileData = io.BytesIO(pcap_file)
     packets = rdpcap(fileData)
 
-    print(packets[0].show())
-    limit = min(len(packets), limit)
+    if len(packets) > 1000:
+        raise ValueError(f"File too large: {len(packets)} packets. Maximum allowed is 1000.")
+    
+    if len(packets) > 0:
+        first_packet = packets[0]
+        # Check if the packet has Wireless-specific layers
+        if first_packet.haslayer(RadioTap) or first_packet.haslayer(Dot11):
+            raise ValueError("Monitor Mode packets detected. Only standard Interface Mode (Ethernet) captures are supported.")
 
-    show_packets = [packet_to_dict(p) for p in packets[:limit]]  # Convert packets to dicts for JSON serialization
+    show_packets = [packet_to_dict(p) for p in packets]  # Convert packets to dicts for JSON serialization
     summary_packets = [str(p) for p in packets]  # Summarize packets for quick analysis
 
     return {
@@ -28,16 +35,16 @@ def packet_to_dict(pkt):
 
         if layer_name in ["Raw", "Padding"]:
             # For Raw and Padding layers, we want to capture the actual payload data
-            data[layer_name] = str(layer.load)  # Convert bytes to string for JSON
+            data[layer_name.upper()] = str(layer.load)  # Convert bytes to string for JSON
             layer = layer.payload if layer.payload.name != 'NoPayload' else None
             continue
 
         # Capture all defined fields for this specific layer
-        data[layer_name] = ast.literal_eval(str(layer.fields).replace("<", '"').replace(">", '"'))  # Convert fields to string for better readability in JSON
+        data[layer_name.upper()] = ast.literal_eval(str(layer.fields).replace("<", '"').replace(">", '"').replace("b'", "'"))  # Convert fields to string for better readability in JSON
 
         layer = layer.payload if layer.payload.name != 'NoPayload' else None
 
-        print(f"Layer: {layer_name}, Fields: {data[layer_name]}")
+        # print(f"Layer: {layer_name}, Fields: {data[layer_name]}")
         
     # print(f"Packet Summary: {data}")
     return data
