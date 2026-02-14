@@ -295,7 +295,6 @@ def getOSI():
         print(f"CRITICAL ERROR: {str(e)}", file=sys.stderr)
         return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
     
-
 # Get all the Protocols in given pcap file    
 @app.route("/get/<string:protocol>", methods=["POST"])
 def getProtocolInfo(protocol):

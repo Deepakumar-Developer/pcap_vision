@@ -21,7 +21,6 @@ migration:
     - platform: web
       create_revision: 66dd93f9a27ffe2a9bfc8297506ce066ff51265f
       base_revision: 66dd93f9a27ffe2a9bfc8297506ce066ff51265f
-
   # User provided section
 
   # List of Local paths (relative to this file) that should be
