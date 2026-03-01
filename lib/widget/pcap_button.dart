@@ -5,7 +5,15 @@ class PcapButton extends StatefulWidget {
   final VoidCallback? onPressed;
   final String text;
   final IconData? icon;
-  const PcapButton({super.key, this.onPressed, required this.text, this.icon});
+  final double? width;
+
+  const PcapButton({
+    super.key,
+    this.onPressed,
+    required this.text,
+    this.icon,
+    this.width,
+  });
 
   @override
   State<PcapButton> createState() => _PcapButtonState();
@@ -19,6 +27,7 @@ class _PcapButtonState extends State<PcapButton> {
       child: GestureDetector(
         onTap: widget.onPressed,
         child: Container(
+          width: widget.width,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           alignment: Alignment.center,
           decoration: BoxDecoration(
@@ -61,6 +70,35 @@ class _PcapTextButtonState extends State<PcapTextButton> {
       child: GestureDetector(
         onTap: widget.onPressed,
         child: PcapText(widget.text, fontSize: 14),
+      ),
+    );
+  }
+}
+
+class PcapIconButton extends StatefulWidget {
+  final VoidCallback? onPressed;
+  final IconData? icon;
+  const PcapIconButton({super.key, this.onPressed, this.icon});
+
+  @override
+  State<PcapIconButton> createState() => _PcapIconButtonState();
+}
+
+class _PcapIconButtonState extends State<PcapIconButton> {
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: widget.onPressed,
+        child: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.25),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(widget.icon ?? Icons.refresh, color: Colors.white),
+        ),
       ),
     );
   }

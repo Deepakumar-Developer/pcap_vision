@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
+      title: 'Pcap Vision',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: Color(0xff137FEC),
