@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:pcap_vision/function/app_function.dart';
 import 'package:pcap_vision/widget/pcap_button.dart';
 import 'package:pcap_vision/widget/pcap_input.dart';
 import 'package:pcap_vision/widget/pcap_text.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pcap_vision/widget/pcap_widget.dart';
+import 'package:desktop_drop/desktop_drop.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -19,7 +21,10 @@ class _MyHomePageState extends State<MyHomePage> {
   TextEditingController pathController = TextEditingController();
   String selectedInterface = "Wi-Fi";
   List<String> interface = ['Ethernet', 'Wi-Fi', 'Loopback', 'Bluetooth'];
-  bool showCaptureInput = false, showInterfaceSelection = false;
+  bool showCaptureInput = false,
+      showInterfaceSelection = false,
+      isLoader = false,
+      isDragging = false;
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +94,36 @@ class _MyHomePageState extends State<MyHomePage> {
                               fontSize: 14,
                             ),
                             SizedBox(height: 24),
-                            pcapUploadArea(context),
+                            DropTarget(
+                              onDragDone: (detail) async {
+                                setState(() => isLoader = true);
+                                final file = detail.files.first;
+                                final bytes = await file.readAsBytes();
+                                processFile(file.name, bytes);
+                              },
+                              onDragEntered: (detail) =>
+                                  setState(() => isDragging = true),
+                              onDragExited: (detail) =>
+                                  setState(() => isDragging = false),
+                              child: Stack(
+                                children: [
+                                  pcapUploadArea(context),
+                                  Visibility(
+                                    visible: isDragging,
+                                    child: Container(
+                                      height: 250,
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.primary.withOpacity(0.2),
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -299,28 +333,36 @@ class _MyHomePageState extends State<MyHomePage> {
                   SizedBox(height: 24),
                   PcapButton(
                     text: "Start Capture",
-                    onPressed: () {},
+                    onPressed: () {
+                      setState(() {
+                        isLoader = true;
+                      });
+                    },
                     icon: Icons.search,
                   ),
                 ],
               ),
             ),
           ),
-          Align(
-            alignment: Alignment.topRight,
-            child: Padding(
-              padding: EdgeInsets.all(24),
-              child: PcapIconButton(
-                onPressed: () {
-                  setState(() {
-                    showCaptureInput = false;
-                    showInterfaceSelection = false;
-                  });
-                },
-                icon: Icons.close,
+          Visibility(
+            visible: showCaptureInput || showInterfaceSelection,
+            child: Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: EdgeInsets.all(24),
+                child: PcapIconButton(
+                  onPressed: () {
+                    setState(() {
+                      showCaptureInput = false;
+                      showInterfaceSelection = false;
+                    });
+                  },
+                  icon: Icons.close,
+                ),
               ),
             ),
           ),
+          Visibility(visible: isLoader, child: pcapLoader(context)),
         ],
       ),
       persistentFooterAlignment: AlignmentDirectional.center,

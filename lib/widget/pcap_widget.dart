@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:pcap_vision/function/app_function.dart';
 import 'package:pcap_vision/widget/pcap_button.dart';
 import 'package:pcap_vision/widget/pcap_input.dart';
 import 'package:pcap_vision/widget/pcap_text.dart';
@@ -54,7 +56,14 @@ Widget pcapUploadArea(BuildContext context) {
           style: TextStyle(color: Colors.white54, fontSize: 14),
         ),
         SizedBox(height: 20),
-        PcapButton(text: "Browse Files", onPressed: () {}, width: 250),
+        PcapButton(
+          text: "Browse Files",
+          onPressed: () async {
+            bool success = await pickFile();
+            print("File picking result: $success");
+          },
+          width: 250,
+        ),
       ],
     ),
   );
@@ -88,6 +97,21 @@ Widget pcapCaptureArea(
         ),
         SizedBox(height: 24),
       ],
+    ),
+  );
+}
+
+Widget pcapLoader(BuildContext context) {
+  return Container(
+    height: height(context),
+    width: width(context),
+    decoration: BoxDecoration(
+      color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+    ),
+    alignment: Alignment.center,
+    child: LoadingAnimationWidget.halfTriangleDot(
+      color: Theme.of(context).colorScheme.primary,
+      size: 40,
     ),
   );
 }
