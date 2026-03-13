@@ -27,7 +27,7 @@ def get_pcap_protocols(pcap_file, type):
     
     proto_counter = Counter()
     i = 1
-    for packet in packets[0:1]:
+    for packet in packets:
         # Loop through each layer in the current packet
         layer_index = 0
         # print(f"{i} {packet}")

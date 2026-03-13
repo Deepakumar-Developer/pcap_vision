@@ -30,7 +30,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      appBar: pcapAppBar(),
+      appBar: pcapAppBar(context),
       body: Stack(
         children: [
           Column(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pcap_vision/pages/my_home_page.dart';
+import 'package:pcap_vision/pages/my_result_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -23,7 +24,8 @@ class MyApp extends StatelessWidget {
           surface: Color(0xff101922),
         ),
       ),
-      home: const MyHomePage(),
+      home: const MyResultPage(),
+      // home: const MyHomePage(),
     );
   }
 }
