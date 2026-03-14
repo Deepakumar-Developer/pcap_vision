@@ -39,6 +39,44 @@ class ProtocolData {
   final int count;
 }
 
+// IP Data Models
+class IPData {
+  IPData(this.ip, this.count);
+  final String ip;
+  final int count;
+  String get fullLabel => ip;
+}
+
+// MAC Data Models
+class MACData {
+  MACData(this.mac, this.count);
+  final String mac;
+  final int count;
+  String get fullLabel => mac;
+}
+
+// Conversation Data Model
+class ConversationData {
+  ConversationData(this.shortLabel, this.count, this.fullLabel);
+  final String shortLabel;
+  final int count;
+  final String fullLabel;
+}
+
+// OSI Layer Data Model
+class OSIBubbleData {
+  OSIBubbleData({
+    required this.layer,
+    required this.protocol,
+    required this.count,
+    required this.size,
+  });
+  final int layer;
+  final String protocol;
+  final int count;
+  final double size;
+}
+
 class GetData {
   Map<String, dynamic> metaData = {
     "msg": "metadata analysis complete",
@@ -83,7 +121,7 @@ class GetData {
 
   Map<String, dynamic> ipAddrData = {
     "ip_endpoint_info": {
-      "top_conversations": [
+      "conversations": [
         {
           "count": 3,
           "endpoints": ["142.250.67.42", "192.168.1.15"],
@@ -133,7 +171,7 @@ class GetData {
           "endpoints": ["172.64.149.23", "192.168.1.15"],
         },
       ],
-      "top_destination_ips": [
+      "destination_ips": [
         {"count": 50, "ip": "192.168.1.15"},
         {"count": 1, "ip": "142.250.67.42"},
         {"count": 2, "ip": "142.250.67.35"},
@@ -148,7 +186,7 @@ class GetData {
         {"count": 16, "ip": "172.217.24.14"},
         {"count": 1, "ip": "172.64.149.23"},
       ],
-      "top_source_ips": [
+      "source_ips": [
         {"count": 2, "ip": "142.250.67.42"},
         {"count": 52, "ip": "192.168.1.15"},
         {"count": 1, "ip": "142.250.67.35"},
@@ -165,5 +203,404 @@ class GetData {
       ],
     },
     "msg": "IP endpoint analysis complete",
+  };
+
+  Map<String, dynamic> macAddrData = {
+    "mac_endpoint_info": {
+      "conversations": [
+        {
+          "count": 104,
+          "endpoints": ["44:95:3b:9f:37:80", "60:ff:9e:50:6a:2c"],
+        },
+        {
+          "count": 30,
+          "endpoints": ["2c:6d:c1:25:b4:ad", "ff:ff:ff:ff:ff:ff"],
+        },
+      ],
+      "destination_macs": [
+        {"count": 51, "mac": "60:ff:9e:50:6a:2c"},
+        {"count": 53, "mac": "44:95:3b:9f:37:80"},
+        {"count": 30, "mac": "ff:ff:ff:ff:ff:ff"},
+      ],
+      "source_macs": [
+        {"count": 51, "mac": "44:95:3b:9f:37:80"},
+        {"count": 53, "mac": "60:ff:9e:50:6a:2c"},
+        {"count": 30, "mac": "2c:6d:c1:25:b4:ad"},
+      ],
+    },
+    "msg": "MAC endpoint analysis complete",
+  };
+
+  Map<String, dynamic> osiLayerData = {
+    "msg": "OSI layer mapping complete",
+    "osi_mapping": {
+      "0": {"count": 0, "data": []},
+      "1": {"count": 0, "data": []},
+      "2": {
+        "count": 32,
+        "data": [
+          {"layer_name": "Data Link", "summary": "Ethernet Frame"},
+          {"layer_name": "Data Link", "summary": "Ethernet Frame"},
+          {"layer_name": "Data Link", "summary": "Ethernet Frame"},
+          {"layer_name": "Data Link", "summary": "Ethernet Frame"},
+          {"layer_name": "Data Link", "summary": "Ethernet Frame"},
+          {"layer_name": "Data Link", "summary": "Ethernet Frame"},
+          {"layer_name": "Data Link", "summary": "Ethernet Frame"},
+          {"layer_name": "Data Link", "summary": "Ethernet Frame"},
+          {"layer_name": "Data Link", "summary": "Ethernet Frame"},
+          {"layer_name": "Data Link", "summary": "Ethernet Frame"},
+          {"layer_name": "Data Link", "summary": "Ethernet Frame"},
+          {"layer_name": "Data Link", "summary": "Ethernet Frame"},
+          {"layer_name": "Data Link", "summary": "Ethernet Frame"},
+          {"layer_name": "Data Link", "summary": "ARP (Hardware Address)"},
+          {"layer_name": "Data Link", "summary": "Ethernet Frame"},
+          {"layer_name": "Data Link", "summary": "ARP (Hardware Address)"},
+          {"layer_name": "Data Link", "summary": "Ethernet Frame"},
+          {"layer_name": "Data Link", "summary": "ARP (Hardware Address)"},
+          {"layer_name": "Data Link", "summary": "Ethernet Frame"},
+          {"layer_name": "Data Link", "summary": "ARP (Hardware Address)"},
+          {"layer_name": "Data Link", "summary": "Ethernet Frame"},
+          {"layer_name": "Data Link", "summary": "ARP (Hardware Address)"},
+          {"layer_name": "Data Link", "summary": "Ethernet Frame"},
+          {"layer_name": "Data Link", "summary": "ARP (Hardware Address)"},
+          {"layer_name": "Data Link", "summary": "Ethernet Frame"},
+          {"layer_name": "Data Link", "summary": "ARP (Hardware Address)"},
+          {"layer_name": "Data Link", "summary": "Ethernet Frame"},
+          {"layer_name": "Data Link", "summary": "ARP (Hardware Address)"},
+          {"layer_name": "Data Link", "summary": "Ethernet Frame"},
+          {"layer_name": "Data Link", "summary": "ARP (Hardware Address)"},
+          {"layer_name": "Data Link", "summary": "Ethernet Frame"},
+          {"layer_name": "Data Link", "summary": "ARP (Hardware Address)"},
+          {"layer_name": "Data Link", "summary": "Ethernet Frame"},
+        ],
+      },
+      "3": {
+        "count": 8,
+        "data": [
+          {"layer_name": "Network", "summary": "IP (142.250.67.42)"},
+          {"layer_name": "Network", "summary": "IP (142.250.67.42)"},
+          {"layer_name": "Network", "summary": "IP (192.168.1.15)"},
+          {"layer_name": "Network", "summary": "IP (192.168.1.15)"},
+          {"layer_name": "Network", "summary": "IP (192.168.1.15)"},
+          {"layer_name": "Network", "summary": "IP (142.250.67.35)"},
+          {"layer_name": "Network", "summary": "IP (192.168.1.15)"},
+          {"layer_name": "Network", "summary": "IP (199.232.210.172)"},
+        ],
+      },
+      "4": {
+        "count": 15,
+        "data": [
+          {"layer_name": "Transport", "summary": "UDP (Port: 63257)"},
+          {"layer_name": "Transport", "summary": "UDP (Port: 63257)"},
+          {"layer_name": "Transport", "summary": "UDP (Port: 443)"},
+          {"layer_name": "Transport", "summary": "TCP (Port: 80)"},
+          {"layer_name": "Transport", "summary": "TCP (Port: 80)"},
+          {"layer_name": "Transport", "summary": "TCP (Port: 61307)"},
+          {"layer_name": "Transport", "summary": "TCP (Port: 80)"},
+          {"layer_name": "Transport", "summary": "TCP (Port: 61308)"},
+          {"layer_name": "Transport", "summary": "TCP (Port: 61308)"},
+          {"layer_name": "Transport", "summary": "TCP (Port: 80)"},
+          {"layer_name": "Transport", "summary": "TCP (Port: 443)"},
+          {"layer_name": "Transport", "summary": "TCP (Port: 61306)"},
+          {"layer_name": "Transport", "summary": "TCP (Port: 443)"},
+          {"layer_name": "Transport", "summary": "TCP (Port: 50468)"},
+          {"layer_name": "Transport", "summary": "TCP (Port: 443)"},
+        ],
+      },
+      "5": {"count": 0, "data": []},
+      "6": {
+        "count": 15,
+        "data": [
+          {"layer_name": "Presentation", "summary": "Encrypted (TLS/SSL)"},
+          {"layer_name": "Presentation", "summary": "Encrypted (TLS/SSL)"},
+          {"layer_name": "Presentation", "summary": "Encrypted (TLS/SSL)"},
+          {"layer_name": "Presentation", "summary": "Encrypted (TLS/SSL)"},
+          {"layer_name": "Presentation", "summary": "Encrypted (TLS/SSL)"},
+          {"layer_name": "Presentation", "summary": "Encrypted (TLS/SSL)"},
+          {"layer_name": "Presentation", "summary": "Encrypted (TLS/SSL)"},
+          {"layer_name": "Presentation", "summary": "Encrypted (TLS/SSL)"},
+          {"layer_name": "Presentation", "summary": "Encrypted (TLS/SSL)"},
+          {"layer_name": "Presentation", "summary": "Encrypted (TLS/SSL)"},
+          {"layer_name": "Presentation", "summary": "Encrypted (TLS/SSL)"},
+          {"layer_name": "Presentation", "summary": "Encrypted (TLS/SSL)"},
+          {"layer_name": "Presentation", "summary": "Encrypted (TLS/SSL)"},
+          {"layer_name": "Presentation", "summary": "Encrypted (TLS/SSL)"},
+          {"layer_name": "Presentation", "summary": "Encrypted (TLS/SSL)"},
+        ],
+      },
+      "7": {
+        "count": 8,
+        "data": [
+          {"layer_name": "Application", "summary": "DNS"},
+          {"layer_name": "Application", "summary": "DNS"},
+          {"layer_name": "Application", "summary": "DNS"},
+          {"layer_name": "Application", "summary": "DNS"},
+          {"layer_name": "Application", "summary": "DNS"},
+          {"layer_name": "Application", "summary": "DNS"},
+          {"layer_name": "Application", "summary": "DNS"},
+          {"layer_name": "Application", "summary": "DNS"},
+        ],
+      },
+    },
+  };
+
+  Map<String, dynamic> pcapData = {
+    "msg": "analysis complete",
+    "packet_details": [
+      {
+        "ETHERNET": {
+          "dst": "60:ff:9e:50:6a:2c",
+          "src": "44:95:3b:9f:37:80",
+          "type": 2048,
+        },
+        "IP": {
+          "chksum": 43519,
+          "dst": "192.168.1.15",
+          "flags": "Flag 2 (DF)",
+          "frag": 0,
+          "id": 0,
+          "ihl": 5,
+          "len": 146,
+          "options": [],
+          "proto": 17,
+          "src": "142.250.67.42",
+          "tos": 128,
+          "ttl": 60,
+          "version": 4,
+        },
+        "UDP": {"chksum": 3136, "dport": 63257, "len": 126, "sport": 443},
+      },
+      {
+        "ETHERNET": {
+          "dst": "60:ff:9e:50:6a:2c",
+          "src": "44:95:3b:9f:37:80",
+          "type": 2048,
+        },
+        "IP": {
+          "chksum": 43519,
+          "dst": "192.168.1.15",
+          "flags": "Flag 2 (DF)",
+          "frag": 0,
+          "id": 0,
+          "ihl": 5,
+          "len": 146,
+          "options": [],
+          "proto": 17,
+          "src": "142.250.67.42",
+          "tos": 128,
+          "ttl": 60,
+          "version": 4,
+        },
+        "UDP": {"chksum": 42857, "dport": 63257, "len": 126, "sport": 443},
+      },
+      {
+        "ETHERNET": {
+          "dst": "44:95:3b:9f:37:80",
+          "src": "60:ff:9e:50:6a:2c",
+          "type": 2048,
+        },
+        "IP": {
+          "chksum": 13411,
+          "dst": "142.250.67.42",
+          "flags": "Flag 2 (DF)",
+          "frag": 0,
+          "id": 12912,
+          "ihl": 5,
+          "len": 62,
+          "options": [],
+          "proto": 17,
+          "src": "192.168.1.15",
+          "tos": 0,
+          "ttl": 128,
+          "version": 4,
+        },
+        "UDP": {"chksum": 45703, "dport": 443, "len": 42, "sport": 63257},
+      },
+      {
+        "ETHERNET": {
+          "dst": "44:95:3b:9f:37:80",
+          "src": "60:ff:9e:50:6a:2c",
+          "type": 2048,
+        },
+        "IP": {
+          "chksum": 6630,
+          "dst": "142.250.67.35",
+          "flags": "Flag 2 (DF)",
+          "frag": 0,
+          "id": 19733,
+          "ihl": 5,
+          "len": 40,
+          "options": [],
+          "proto": 6,
+          "src": "192.168.1.15",
+          "tos": 0,
+          "ttl": 128,
+          "version": 4,
+        },
+        "TCP": {
+          "ack": 1643721517,
+          "chksum": 32462,
+          "dataofs": 5,
+          "dport": 80,
+          "flags": "Flag 17 (FA)",
+          "options": [],
+          "reserved": 0,
+          "seq": 21435897,
+          "sport": 61307,
+          "urgptr": 0,
+          "window": 254,
+        },
+      },
+      {
+        "ETHERNET": {
+          "dst": "44:95:3b:9f:37:80",
+          "src": "60:ff:9e:50:6a:2c",
+          "type": 2048,
+        },
+        "IP": {
+          "chksum": 24726,
+          "dst": "199.232.210.172",
+          "flags": "Flag 2 (DF)",
+          "frag": 0,
+          "id": 15853,
+          "ihl": 5,
+          "len": 40,
+          "options": [],
+          "proto": 6,
+          "src": "192.168.1.15",
+          "tos": 0,
+          "ttl": 128,
+          "version": 4,
+        },
+        "TCP": {
+          "ack": 2332060616,
+          "chksum": 17589,
+          "dataofs": 5,
+          "dport": 80,
+          "flags": "Flag 17 (FA)",
+          "options": [],
+          "reserved": 0,
+          "seq": 2070457300,
+          "sport": 61308,
+          "urgptr": 0,
+          "window": 255,
+        },
+      },
+      {
+        "ETHERNET": {
+          "dst": "60:ff:9e:50:6a:2c",
+          "src": "44:95:3b:9f:37:80",
+          "type": 2048,
+        },
+        "IP": {
+          "chksum": 35625,
+          "dst": "192.168.1.15",
+          "flags": "Flag 0 ()",
+          "frag": 0,
+          "id": 8274,
+          "ihl": 5,
+          "len": 40,
+          "options": [],
+          "proto": 6,
+          "src": "142.250.67.35",
+          "tos": 128,
+          "ttl": 123,
+          "version": 4,
+        },
+        "TCP": {
+          "ack": 21435898,
+          "chksum": 31662,
+          "dataofs": 5,
+          "dport": 61307,
+          "flags": "Flag 17 (FA)",
+          "options": [],
+          "reserved": 0,
+          "seq": 1643721517,
+          "sport": 80,
+          "urgptr": 0,
+          "window": 1053,
+        },
+      },
+      {
+        "ETHERNET": {
+          "dst": "44:95:3b:9f:37:80",
+          "src": "60:ff:9e:50:6a:2c",
+          "type": 2048,
+        },
+        "IP": {
+          "chksum": 6629,
+          "dst": "142.250.67.35",
+          "flags": "Flag 2 (DF)",
+          "frag": 0,
+          "id": 19734,
+          "ihl": 5,
+          "len": 40,
+          "options": [],
+          "proto": 6,
+          "src": "192.168.1.15",
+          "tos": 0,
+          "ttl": 128,
+          "version": 4,
+        },
+        "TCP": {
+          "ack": 1643721518,
+          "chksum": 32461,
+          "dataofs": 5,
+          "dport": 80,
+          "flags": "Flag 16 (A)",
+          "options": [],
+          "reserved": 0,
+          "seq": 21435898,
+          "sport": 61307,
+          "urgptr": 0,
+          "window": 254,
+        },
+      },
+      {
+        "ETHERNET": {
+          "dst": "60:ff:9e:50:6a:2c",
+          "src": "44:95:3b:9f:37:80",
+          "type": 2048,
+        },
+        "IP": {
+          "chksum": 47066,
+          "dst": "192.168.1.15",
+          "flags": "Flag 2 (DF)",
+          "frag": 0,
+          "id": 10921,
+          "ihl": 5,
+          "len": 40,
+          "options": [],
+          "proto": 6,
+          "src": "199.232.210.172",
+          "tos": 0,
+          "ttl": 60,
+          "version": 4,
+        },
+        "TCP": {
+          "ack": 2070457301,
+          "chksum": 17784,
+          "dataofs": 5,
+          "dport": 61308,
+          "flags": "Flag 16 (A)",
+          "options": [],
+          "reserved": 0,
+          "seq": 2332060616,
+          "sport": 80,
+          "urgptr": 0,
+          "window": 60,
+        },
+      },
+    ],
+    "packet_summaries": [
+      "Ether / IP / UDP 142.250.67.42:https > 192.168.1.15:63257 / Raw",
+      "Ether / IP / UDP 192.168.1.15:63257 > 142.250.67.42:https / Raw",
+      "Ether / IP / TCP 192.168.1.15:61307 > 142.250.67.35:http FA",
+      "Ether / ARP who has 192.168.1.205 says 192.168.1.8",
+      "Ether / IP / UDP 192.168.1.15:55972 > 34.49.23.1:https / Raw",
+      "Ether / IP / UDP / DNS Qry b'www.google-analytics.com.'",
+      "Ether / IP / UDP / DNS Ans 172.217.24.14",
+      "Ether / IP / TCP 192.168.1.15:59171 > 172.64.149.23:http A",
+    ],
   };
 }

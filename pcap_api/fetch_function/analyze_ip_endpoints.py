@@ -64,9 +64,9 @@ def analyze_ip_endpoints(pcap_file, type):
         print(f"{ip_a:<15} <---> {ip_b:<15} | {count}")
 
     ip_endpoint_info = {
-        "top_source_ips": [{"ip": ip, "count": count} for ip, count in src_ips.items()],
-        "top_destination_ips": [{"ip": ip, "count": count} for ip, count in dst_ips.items()],
-        "top_conversations": [{"endpoints": pair, "count": count} for pair, count in conversations.items()]
+        "source_ips": [{"ip": ip, "count": count} for ip, count in src_ips.items()],
+        "destination_ips": [{"ip": ip, "count": count} for ip, count in dst_ips.items()],
+        "conversations": [{"endpoints": pair, "count": count} for pair, count in conversations.items()]
     }
 
     return {'msg': 'IP endpoint analysis complete', 'ip_endpoint_info': ip_endpoint_info}

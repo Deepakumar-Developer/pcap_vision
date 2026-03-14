@@ -55,7 +55,12 @@ def map_osi_layer(packet):
     result = []
 
     if packet.haslayer(HTTP) or packet.haslayer(DNS) or packet.haslayer(DHCP):
-        result.append((7, "Application", packet.summary()))
+        if packet.haslayer(HTTP):
+            result.append((7, "Application", "HTTP"))
+        if packet.haslayer(DNS):
+            result.append((7, "Application", "DNS"))
+        if packet.haslayer(DHCP):
+            result.append((7, "Application", "DHCP"))
     
     # Layer 6: Presentation (TLS/SSL encryption lives here)
     if packet.haslayer(TLS):

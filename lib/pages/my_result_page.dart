@@ -13,6 +13,10 @@ class MyResultPage extends StatefulWidget {
 class _MyResultPageState extends State<MyResultPage> {
   Map<String, dynamic> metaData = GetData().metaData;
   Map<String, dynamic> protocolData = GetData().protocolData;
+  Map<String, dynamic> ipAddrData = GetData().ipAddrData;
+  Map<String, dynamic> macAddrData = GetData().macAddrData;
+  Map<String, dynamic> osiLayerData = GetData().osiLayerData;
+  Map<String, dynamic> pcapData = GetData().pcapData;
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +46,49 @@ class _MyResultPageState extends State<MyResultPage> {
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.secondary.withOpacity(0.5),
                 borderRadius: BorderRadius.circular(16),
+              ),
+              child: PageView(
+                scrollDirection: Axis.vertical,
+                children: [
+                  SizedBox(
+                    height: height(context) - 174,
+                    width: width(context) - 300 - 250 - (24 * 4),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Expanded(child: IpWidget(ipAddrData: ipAddrData)),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                          child: ColoredBox(
+                            color: Theme.of(context).colorScheme.secondary,
+                            child: SizedBox(width: 2, height: height(context)),
+                          ),
+                        ),
+                        Expanded(child: MacWidget(macAddrData: macAddrData)),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: height(context) - 174,
+                    width: width(context) - 300 - 250 - (24 * 4),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: OSILayerWidget(osiLayerData: osiLayerData),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                          child: ColoredBox(
+                            color: Theme.of(context).colorScheme.secondary,
+                            child: SizedBox(width: 2, height: height(context)),
+                          ),
+                        ),
+                        Expanded(child: SummaryWidget(pcapData: pcapData)),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
             SizedBox(

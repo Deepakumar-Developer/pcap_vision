@@ -43,8 +43,8 @@ def packet_to_dict(pkt):
         layer_name = layer.name
 
         if layer_name in ["Raw", "Padding"]:
-            # For Raw and Padding layers, we want to capture the actual payload data
-            data[layer_name.upper()] = str(layer.load)  # Convert bytes to string for JSON
+            # # For Raw and Padding layers, we want to capture the actual payload data
+            # data[layer_name.upper()] = str(layer.load)  # Convert bytes to string for JSON
             layer = layer.payload if layer.payload.name != 'NoPayload' else None
             continue
 

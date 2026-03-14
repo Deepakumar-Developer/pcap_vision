@@ -49,9 +49,9 @@ def analyze_mac_endpoints(pcap_file, type):
             conversations[pair] += 1
 
     mac_endpoint_info = {
-        "top_source_macs": [{"mac": mac, "count": count} for mac, count in src_macs.items()],
-        "top_destination_macs": [{"mac": mac, "count": count} for mac, count in dst_macs.items()],
-        "top_conversations": [{"endpoints": pair, "count": count} for pair, count in conversations.items()]
+        "source_macs": [{"mac": mac, "count": count} for mac, count in src_macs.items()],
+        "destination_macs": [{"mac": mac, "count": count} for mac, count in dst_macs.items()],
+        "conversations": [{"endpoints": pair, "count": count} for pair, count in conversations.items()]
     }
 
     # 1. Top 5 Source IPs
