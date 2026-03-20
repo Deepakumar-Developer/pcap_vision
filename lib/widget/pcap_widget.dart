@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:pcap_vision/pages/my_protocol_page.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:pcap_vision/function/app_function.dart';
 import 'package:pcap_vision/widget/pcap_button.dart';
@@ -17,6 +18,7 @@ PreferredSizeWidget pcapAppBar(BuildContext context) => AppBar(
   scrolledUnderElevation: 0,
   surfaceTintColor: Colors.transparent,
   backgroundColor: Theme.of(context).colorScheme.surface,
+  automaticallyImplyLeading: false,
   actions: [
     PcapTextButton(onPressed: () {}, text: "About"),
     SizedBox(width: 24),
@@ -697,215 +699,118 @@ class OSILayerWidget extends StatefulWidget {
 }
 
 class _OSILayerWidgetState extends State<OSILayerWidget> {
-  String getLayerName(String key) {
-    switch (key) {
-      case "2":
-        return "Data Link";
-      case "3":
-        return "Network";
-      case "4":
-        return "Transport";
-      case "5":
-        return "Session";
-      case "6":
-        return "Presentation";
-      case "7":
-        return "Application";
-      default:
-        return "Physical";
+  Map<String, int> countProtocols(List data) {
+    final map = <String, int>{};
+
+    for (var item in data) {
+      String protocol = item['summary'];
+
+      map[protocol] = (map[protocol] ?? 0) + 1;
     }
+
+    return map;
   }
 
   @override
   Widget build(BuildContext context) {
-    List<OSIBubbleData> chartData = [];
+    List<List<LayerData>> chartData = [];
 
-    // Parse your JSON into Bubble Data
-    widget.osiLayerData['osi_mapping'].forEach((layerKey, value) {
-      Map<String, int> internalCounts = {};
-      List dataList = value['data'];
-
-      for (var item in dataList) {
-        String name = item['summary'].toString().split(' ')[0];
-        internalCounts[name] = (internalCounts[name] ?? 0) + 1;
+    for (int i = 2; i <= 7; i++) {
+      List layerProtocols =
+          widget.osiLayerData['osi_mapping']['$i']['data'] ?? [];
+      if ((widget.osiLayerData['osi_mapping']['$i']['count'] ?? []) == 0) {
+        chartData.add([LayerData('No Frames', 1)]);
+        continue;
       }
-
-      internalCounts.forEach((proto, count) {
-        chartData.add(
-          OSIBubbleData(
-            layer: int.parse(layerKey),
-            protocol: proto,
-            count: count,
-            // We use the count to define size
-            size: count.toDouble(),
-          ),
-        );
-      });
-    });
-
-    return Container(
-      height: 400,
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Color(0xFF161B22),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: SfCartesianChart(
-        title: ChartTitle(
-          text: 'Protocol Density per OSI Layer',
-          textStyle: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        primaryXAxis: NumericAxis(
-          title: AxisTitle(
-            text: 'OSI Layer',
-            textStyle: TextStyle(color: Colors.white70),
-          ),
-          minimum: 1,
-          maximum: 8,
-          interval: 1,
-          labelStyle: TextStyle(color: Colors.cyanAccent),
-        ),
-        primaryYAxis: NumericAxis(
-          isVisible:
-              false, // Hide Y axis as we only care about horizontal grouping
-          minimum: 0,
-          maximum: 10,
-        ),
-        tooltipBehavior: TooltipBehavior(enable: true, header: 'Protocol Info'),
-        series: <CartesianSeries<OSIBubbleData, num>>[
-          BubbleSeries<OSIBubbleData, num>(
-            dataSource: chartData,
-            xValueMapper: (OSIBubbleData data, _) => data.layer,
-            yValueMapper: (OSIBubbleData data, _) =>
-                5, // Keep all bubbles centered vertically
-            sizeValueMapper: (OSIBubbleData data, _) => data.size,
-
-            // Visual Styling
-            minimumRadius: 10,
-            maximumRadius: 40,
-            gradient: LinearGradient(
-              colors: [
-                Colors.cyanAccent.withOpacity(0.6),
-                Colors.blueAccent.withOpacity(0.6),
-              ],
-            ),
-            dataLabelSettings: DataLabelSettings(
-              isVisible: true,
-              labelAlignment: ChartDataLabelAlignment.middle,
-              textStyle: TextStyle(
-                color: Colors.white,
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-              ),
-              builder:
-                  (
-                    dynamic data,
-                    dynamic point,
-                    dynamic series,
-                    int pointIndex,
-                    int seriesIndex,
-                  ) {
-                    return Text(data.protocol);
-                  },
-            ),
-          ),
-        ],
-      ),
-    );
-    ;
-  }
-
-  Widget _buildLayerRow(
-    String key,
-    String name,
-    Map<String, dynamic> layerData,
-  ) {
-    int count = layerData['count'];
-    List dataList = layerData['data'];
-
-    // Group protocols in this layer to count them (e.g., how many TCP vs UDP)
-    Map<String, int> protocolCounts = {};
-    for (var item in dataList) {
-      String summary = item['summary'].toString().split(
-        ' ',
-      )[0]; // Get 'TCP' from 'TCP (Port: 80)'
-      protocolCounts[summary] = (protocolCounts[summary] ?? 0) + 1;
+      Map<String, int> protocolCounts = countProtocols(layerProtocols);
+      List<LayerData> layerData = protocolCounts.entries
+          .map((entry) => LayerData(entry.key, entry.value))
+          .toList();
+      chartData.add(layerData);
     }
 
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 4, horizontal: 16),
-      padding: EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Color(0xFF161B22),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: count > 0 ? Colors.cyan.withOpacity(0.5) : Colors.white10,
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 120,
-            child: Text(
-              "Layer $key: $name",
-              style: TextStyle(
-                color: count > 0 ? Colors.cyanAccent : Colors.white38,
-                fontWeight: FontWeight.bold,
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 8,
+      children: [
+        PcapText("OSI Layers", fontSize: 18, isBold: true),
+        SizedBox(height: 8),
+        SizedBox(
+          height: height(context) - 220,
+          width: .infinity,
+          child: GridView.count(
+            crossAxisCount: 1,
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 8,
+            children: [
+              LayerCircleChart(
+                layerName: "Layer 2 - Data Link",
+                data: chartData[0],
               ),
-            ),
+              LayerCircleChart(
+                layerName: "Layer 3 - Network",
+                data: chartData[1],
+              ),
+              LayerCircleChart(
+                layerName: "Layer 4 - Transport",
+                data: chartData[2],
+              ),
+              LayerCircleChart(
+                layerName: "Layer 5 - Session",
+                data: chartData[3],
+              ),
+              LayerCircleChart(
+                layerName: "Layer 6 - Presentation",
+                data: chartData[4],
+              ),
+              LayerCircleChart(
+                layerName: "Layer 7 - Application",
+                data: chartData[5],
+              ),
+            ],
           ),
-          Expanded(
-            child: Wrap(
-              spacing: 8,
-              children: protocolCounts.entries.map((entry) {
-                return _buildProtocolCircle(entry.key, entry.value);
-              }).toList(),
-            ),
-          ),
-          if (count == 0)
-            Text(
-              "No Data",
-              style: TextStyle(color: Colors.white24, fontSize: 12),
-            ),
-        ],
-      ),
+        ),
+      ],
     );
   }
+}
 
-  Widget _buildProtocolCircle(String name, int count) {
-    return Tooltip(
-      message: "$name: $count packets",
-      child: Container(
-        padding: EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: LinearGradient(
-            colors: [
-              Colors.cyanAccent.withOpacity(0.8),
-              Colors.blueAccent.withOpacity(0.8),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.cyanAccent.withOpacity(0.2),
-              blurRadius: 4,
-              spreadRadius: 1,
+class LayerCircleChart extends StatelessWidget {
+  final String layerName;
+  final List<LayerData> data;
+
+  const LayerCircleChart({
+    super.key,
+    required this.layerName,
+    required this.data,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primary.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          const SizedBox(height: 10),
+          PcapText(layerName, fontSize: 12, isBold: true),
+          Expanded(
+            child: SfCircularChart(
+              tooltipBehavior: TooltipBehavior(enable: true),
+              series: <CircularSeries>[
+                DoughnutSeries<LayerData, String>(
+                  dataSource: data,
+                  xValueMapper: (LayerData data, _) => data.protocol,
+                  yValueMapper: (LayerData data, _) => data.count,
+                  enableTooltip: true,
+                ),
+              ],
             ),
-          ],
-        ),
-        child: Text(
-          name.substring(0, 1), // Shows first letter, e.g., 'T' for TCP
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-            fontSize: 12,
           ),
-        ),
+        ],
       ),
     );
   }
@@ -1005,54 +910,81 @@ class _SummaryWidgetState extends State<SummaryWidget> {
   }
 }
 
-Widget protocolWidget(BuildContext context, Map<String, dynamic> protocolData) {
-  return Column(
-    mainAxisAlignment: MainAxisAlignment.start,
-    crossAxisAlignment: CrossAxisAlignment.start,
-    spacing: 8,
-    children: [
-      PcapText("Protocol Analysis", fontSize: 18, isBold: true),
-      SizedBox(height: 8),
-      Expanded(
-        child: SizedBox(
-          width: double.infinity,
-          child: ListView.builder(
-            itemBuilder: (context, index) {
-              final protocol = protocolData['protocols'][index];
-              return MouseRegion(
-                cursor: SystemMouseCursors.click,
-                child: GestureDetector(
-                  onTap: () {},
-                  child: Container(
-                    padding: EdgeInsets.all(8),
-                    margin: EdgeInsets.only(bottom: 4),
-                    decoration: BoxDecoration(
-                      color: Theme.of(
+class ProtocolWidget extends StatefulWidget {
+  final Map<String, dynamic> protocolData;
+  final List<Map<String, dynamic>> data;
+  const ProtocolWidget({
+    super.key,
+    required this.protocolData,
+    required this.data,
+  });
+
+  @override
+  State<ProtocolWidget> createState() => _ProtocolWidgetState();
+}
+
+class _ProtocolWidgetState extends State<ProtocolWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 8,
+      children: [
+        PcapText("Protocol Analysis", fontSize: 18, isBold: true),
+        SizedBox(height: 8),
+        Expanded(
+          child: SizedBox(
+            width: double.infinity,
+            child: ListView.builder(
+              itemBuilder: (context, index) {
+                final protocol = widget.protocolData['protocols'][index];
+                return MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
                         context,
-                      ).colorScheme.primary.withOpacity(0.05),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        PcapText(protocol['protocol'], fontSize: 12),
-                        Icon(
-                          Icons.arrow_forward_ios,
-                          size: 12,
-                          color: Colors.white54,
+                        MaterialPageRoute(
+                          builder: (context) => MyProtocolPage(
+                            protocolName: protocol['protocol'],
+                            protocolData: widget.data,
+                            count: protocol['count'],
+                          ),
                         ),
-                      ],
+                      );
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(8),
+                      margin: EdgeInsets.only(bottom: 4),
+                      decoration: BoxDecoration(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primary.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          PcapText(protocol['protocol'], fontSize: 12),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            size: 12,
+                            color: Colors.white54,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              );
-            },
-            itemCount: protocolData['protocols'].length,
+                );
+              },
+              itemCount: widget.protocolData['protocols'].length,
+            ),
           ),
         ),
-      ),
-    ],
-  );
+      ],
+    );
+  }
 }
 
 Widget protocolChartWidget(

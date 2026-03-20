@@ -24,8 +24,8 @@ class MyApp extends StatelessWidget {
           surface: Color(0xff101922),
         ),
       ),
-      home: const MyResultPage(),
-      // home: const MyHomePage(),
+      // home: const MyResultPage(),
+      home: const MyHomePage(),
     );
   }
 }

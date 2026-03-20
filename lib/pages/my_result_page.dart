@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pcap_vision/function/app_function.dart';
+import 'package:pcap_vision/widget/pcap_button.dart';
 import 'package:pcap_vision/widget/pcap_text.dart';
 import 'package:pcap_vision/widget/pcap_widget.dart';
 
@@ -17,6 +18,8 @@ class _MyResultPageState extends State<MyResultPage> {
   Map<String, dynamic> macAddrData = GetData().macAddrData;
   Map<String, dynamic> osiLayerData = GetData().osiLayerData;
   Map<String, dynamic> pcapData = GetData().pcapData;
+  bool isTop = true;
+  final _pageController = PageController();
 
   @override
   Widget build(BuildContext context) {
@@ -39,57 +42,103 @@ class _MyResultPageState extends State<MyResultPage> {
               ),
               child: metadataWidget(context, metaData),
             ),
-            Container(
-              height: height(context) - 138,
-              width: width(context) - 300 - 250 - (24 * 4),
-              padding: EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.secondary.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: PageView(
-                scrollDirection: Axis.vertical,
-                children: [
-                  SizedBox(
-                    height: height(context) - 174,
-                    width: width(context) - 300 - 250 - (24 * 4),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Expanded(child: IpWidget(ipAddrData: ipAddrData)),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                          child: ColoredBox(
-                            color: Theme.of(context).colorScheme.secondary,
-                            child: SizedBox(width: 2, height: height(context)),
-                          ),
-                        ),
-                        Expanded(child: MacWidget(macAddrData: macAddrData)),
-                      ],
-                    ),
+            Stack(
+              alignment: Alignment.bottomRight,
+              children: [
+                Container(
+                  height: height(context) - 138,
+                  width: width(context) - 300 - 250 - (24 * 4),
+                  padding: EdgeInsets.all(16.0),
+                  decoration: BoxDecoration(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.secondary.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  SizedBox(
-                    height: height(context) - 174,
-                    width: width(context) - 300 - 250 - (24 * 4),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: OSILayerWidget(osiLayerData: osiLayerData),
+                  child: PageView(
+                    controller: _pageController,
+                    scrollDirection: Axis.vertical,
+                    children: [
+                      SizedBox(
+                        height: height(context) - 174,
+                        width: width(context) - 300 - 250 - (24 * 4),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Expanded(child: IpWidget(ipAddrData: ipAddrData)),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12.0,
+                              ),
+                              child: ColoredBox(
+                                color: Theme.of(context).colorScheme.secondary,
+                                child: SizedBox(
+                                  width: 2,
+                                  height: height(context),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: MacWidget(macAddrData: macAddrData),
+                            ),
+                          ],
                         ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                          child: ColoredBox(
-                            color: Theme.of(context).colorScheme.secondary,
-                            child: SizedBox(width: 2, height: height(context)),
-                          ),
+                      ),
+                      SizedBox(
+                        height: height(context) - 174,
+                        width: width(context) - 300 - 250 - (24 * 4),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              flex: 1,
+                              child: OSILayerWidget(osiLayerData: osiLayerData),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12.0,
+                              ),
+                              child: ColoredBox(
+                                color: Theme.of(context).colorScheme.secondary,
+                                child: SizedBox(
+                                  width: 2,
+                                  height: height(context),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: SummaryWidget(pcapData: pcapData),
+                            ),
+                          ],
                         ),
-                        Expanded(child: SummaryWidget(pcapData: pcapData)),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                PcapIconButton(
+                  icon: isTop ? Icons.arrow_circle_down : Icons.arrow_circle_up,
+                  onPressed: () {
+                    setState(() {
+                      if (isTop) {
+                        _pageController.animateToPage(
+                          1,
+                          duration: Duration(milliseconds: 400),
+                          curve: Curves.easeInOut,
+                        );
+                      } else {
+                        _pageController.animateToPage(
+                          0,
+                          duration: Duration(milliseconds: 400),
+                          curve: Curves.easeInOut,
+                        );
+                      }
+
+                      isTop = !isTop;
+                    });
+                  },
+                ),
+              ],
             ),
             SizedBox(
               height: height(context),
@@ -107,7 +156,10 @@ class _MyResultPageState extends State<MyResultPage> {
                         ).colorScheme.secondary.withOpacity(0.5),
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: protocolWidget(context, protocolData),
+                      child: ProtocolWidget(
+                        protocolData: protocolData,
+                        data: pcapData['packet_details'],
+                      ),
                     ),
                   ),
                   Container(

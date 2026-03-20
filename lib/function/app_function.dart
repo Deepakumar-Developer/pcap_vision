@@ -64,17 +64,11 @@ class ConversationData {
 }
 
 // OSI Layer Data Model
-class OSIBubbleData {
-  OSIBubbleData({
-    required this.layer,
-    required this.protocol,
-    required this.count,
-    required this.size,
-  });
-  final int layer;
+class LayerData {
   final String protocol;
   final int count;
-  final double size;
+
+  LayerData(this.protocol, this.count);
 }
 
 class GetData {

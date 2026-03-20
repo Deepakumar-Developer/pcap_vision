@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pcap_vision/function/app_function.dart';
+import 'package:pcap_vision/pages/my_result_page.dart';
 import 'package:pcap_vision/widget/pcap_button.dart';
 import 'package:pcap_vision/widget/pcap_input.dart';
 import 'package:pcap_vision/widget/pcap_text.dart';
@@ -336,6 +337,12 @@ class _MyHomePageState extends State<MyHomePage> {
                     onPressed: () {
                       setState(() {
                         isLoader = true;
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MyResultPage(),
+                          ),
+                        );
                       });
                     },
                     icon: Icons.search,
