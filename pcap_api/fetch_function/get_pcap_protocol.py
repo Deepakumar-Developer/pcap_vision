@@ -37,6 +37,8 @@ def get_pcap_protocols(pcap_file, type):
             # print(f"{packet.haslayer(layer.)}")
             if layer is None:
                 break
+            if layer.name == 'Raw':
+                break
             # Add the name of the protocol layer (e.g., 'IP', 'TCP') to our counter
             proto_counter[layer.name] += 1
             layer_index += 1

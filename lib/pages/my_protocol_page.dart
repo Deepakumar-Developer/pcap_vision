@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pcap_vision/widget/pcap_protocol_diagram.dart';
 import 'package:pcap_vision/widget/pcap_text.dart';
 import 'package:pcap_vision/widget/pcap_widget.dart';
 
@@ -18,8 +19,63 @@ class MyProtocolPage extends StatefulWidget {
 }
 
 class _MyProtocolPageState extends State<MyProtocolPage> {
+  PcapProtocolDiagram frameDiagram = PcapProtocolDiagram();
+  Widget diagram = Center(
+    child: Column(
+      mainAxisAlignment: .center,
+      crossAxisAlignment: .center,
+      spacing: 16,
+      children: [
+        PcapText('OOPs!', fontSize: 36, isBold: true),
+        PcapText('No Frame Diagram Support', fontSize: 12),
+        PcapText('We are Working...!', fontSize: 8),
+      ],
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
+    if (widget.protocolName.toLowerCase() == 'ethernet') {
+      setState(() {
+        diagram = frameDiagram.ethernet(context);
+      });
+    } else if (widget.protocolName.toLowerCase() == 'arp') {
+      setState(() {
+        diagram = frameDiagram.arp(context);
+      });
+    } else if (widget.protocolName.toLowerCase() == 'ip') {
+      setState(() {
+        diagram = frameDiagram.ip(context);
+      });
+    } else if (widget.protocolName.toLowerCase() == 'icmp') {
+      setState(() {
+        diagram = frameDiagram.icmp(context);
+      });
+    } else if (widget.protocolName.toLowerCase() == 'tcp') {
+      setState(() {
+        diagram = frameDiagram.tcp(context);
+      });
+    } else if (widget.protocolName.toLowerCase() == 'udp') {
+      setState(() {
+        diagram = frameDiagram.udp(context);
+      });
+    } else if (widget.protocolName.toLowerCase() == 'tls') {
+      setState(() {
+        diagram = frameDiagram.tls(context);
+      });
+    } else if (widget.protocolName.toLowerCase() == 'dhcp') {
+      setState(() {
+        diagram = frameDiagram.dhcp(context);
+      });
+    } else if (widget.protocolName.toLowerCase() == 'dns') {
+      setState(() {
+        diagram = frameDiagram.dns(context);
+      });
+    } else if (widget.protocolName.toLowerCase() == 'http') {
+      setState(() {
+        diagram = frameDiagram.http(context);
+      });
+    }
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: pcapAppBar(context),
@@ -32,7 +88,7 @@ class _MyProtocolPageState extends State<MyProtocolPage> {
               child: Container(
                 height: height(context),
 
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(24.0),
                 decoration: BoxDecoration(
                   color: Theme.of(
                     context,
@@ -49,13 +105,10 @@ class _MyProtocolPageState extends State<MyProtocolPage> {
                 child: SizedBox(width: 2, height: height(context)),
               ),
             ),
-
             Expanded(
               flex: 1,
-
               child: SizedBox(
                 height: height(context),
-
                 child: Column(
                   crossAxisAlignment: .end,
                   spacing: 8,
@@ -63,22 +116,20 @@ class _MyProtocolPageState extends State<MyProtocolPage> {
                     PcapText(widget.protocolName, fontSize: 42, isBold: true),
                     PcapText(
                       'Appears ${widget.count} times',
-
                       fontSize: 18,
                       isBold: false,
                     ),
-
                     Container(
                       margin: const EdgeInsets.only(top: 16.0),
                       height: height(context) - 256,
-
-                      padding: const EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(24.0),
                       decoration: BoxDecoration(
                         color: Theme.of(
                           context,
                         ).colorScheme.secondary.withOpacity(0.5),
                         borderRadius: BorderRadius.circular(16),
                       ),
+                      child: Center(child: diagram),
                     ),
                   ],
                 ),
