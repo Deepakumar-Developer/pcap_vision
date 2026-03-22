@@ -924,6 +924,7 @@ class ProtocolWidget extends StatefulWidget {
 }
 
 class _ProtocolWidgetState extends State<ProtocolWidget> {
+  Map<String, dynamic> protocolInfo = GetData().protocolInfo;
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -948,7 +949,7 @@ class _ProtocolWidgetState extends State<ProtocolWidget> {
                         MaterialPageRoute(
                           builder: (context) => MyProtocolPage(
                             protocolName: protocol['protocol'],
-                            protocolData: widget.data,
+                            protocolInfo: protocolInfo,
                             count: protocol['count'],
                           ),
                         ),

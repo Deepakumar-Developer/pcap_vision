@@ -6,12 +6,12 @@ import 'package:pcap_vision/widget/pcap_widget.dart';
 class MyProtocolPage extends StatefulWidget {
   final String protocolName;
   final int count;
-  final List<Map<String, dynamic>> protocolData;
+  final Map<String, dynamic> protocolInfo;
   const MyProtocolPage({
     super.key,
     required this.protocolName,
     required this.count,
-    required this.protocolData,
+    required this.protocolInfo,
   });
 
   @override
@@ -20,6 +20,7 @@ class MyProtocolPage extends StatefulWidget {
 
 class _MyProtocolPageState extends State<MyProtocolPage> {
   PcapProtocolDiagram frameDiagram = PcapProtocolDiagram();
+  String definition = 'We are working on fetching the protocol definition...';
   Widget diagram = Center(
     child: Column(
       mainAxisAlignment: .center,
@@ -38,42 +39,52 @@ class _MyProtocolPageState extends State<MyProtocolPage> {
     if (widget.protocolName.toLowerCase() == 'ethernet') {
       setState(() {
         diagram = frameDiagram.ethernet(context);
+        definition = PcapProtocolDefinition().ethernet;
       });
     } else if (widget.protocolName.toLowerCase() == 'arp') {
       setState(() {
         diagram = frameDiagram.arp(context);
+        definition = PcapProtocolDefinition().arp;
       });
     } else if (widget.protocolName.toLowerCase() == 'ip') {
       setState(() {
         diagram = frameDiagram.ip(context);
+        definition = PcapProtocolDefinition().ip;
       });
     } else if (widget.protocolName.toLowerCase() == 'icmp') {
       setState(() {
         diagram = frameDiagram.icmp(context);
+        definition = PcapProtocolDefinition().icmp;
       });
     } else if (widget.protocolName.toLowerCase() == 'tcp') {
       setState(() {
         diagram = frameDiagram.tcp(context);
+        definition = PcapProtocolDefinition().tcp;
       });
     } else if (widget.protocolName.toLowerCase() == 'udp') {
       setState(() {
         diagram = frameDiagram.udp(context);
+        definition = PcapProtocolDefinition().udp;
       });
     } else if (widget.protocolName.toLowerCase() == 'tls') {
       setState(() {
         diagram = frameDiagram.tls(context);
+        definition = PcapProtocolDefinition().tls;
       });
     } else if (widget.protocolName.toLowerCase() == 'dhcp') {
       setState(() {
         diagram = frameDiagram.dhcp(context);
+        definition = PcapProtocolDefinition().dhcp;
       });
     } else if (widget.protocolName.toLowerCase() == 'dns') {
       setState(() {
         diagram = frameDiagram.dns(context);
+        definition = PcapProtocolDefinition().dns;
       });
     } else if (widget.protocolName.toLowerCase() == 'http') {
       setState(() {
         diagram = frameDiagram.http(context);
+        definition = PcapProtocolDefinition().http;
       });
     }
     return Scaffold(
@@ -85,17 +96,35 @@ class _MyProtocolPageState extends State<MyProtocolPage> {
           children: [
             Expanded(
               flex: 2,
-              child: Container(
+              child: SizedBox(
                 height: height(context),
 
-                padding: const EdgeInsets.all(24.0),
-                decoration: BoxDecoration(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.secondary.withOpacity(0.5),
-                  borderRadius: BorderRadius.circular(16),
+                child: Column(
+                  spacing: 16,
+                  crossAxisAlignment: .start,
+                  children: [
+                    Column(
+                      crossAxisAlignment: .start,
+                      spacing: 8,
+                      children: [
+                        PcapText(
+                          definition.split('\n')[0],
+                          fontSize: 24,
+                          isBold: true,
+                        ),
+                        PcapText(definition.split('\n')[1], fontSize: 16),
+                      ],
+                    ),
+                    Expanded(
+                      child: SizedBox(
+                        width: .infinity,
+                        child: PcapTable(
+                          packetData: widget.protocolInfo['fields'] ?? [],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                // child: ProtocolDetailWidget(protocolData: widget.protocolData),
               ),
             ),
             Padding(
@@ -119,17 +148,18 @@ class _MyProtocolPageState extends State<MyProtocolPage> {
                       fontSize: 18,
                       isBold: false,
                     ),
-                    Container(
-                      margin: const EdgeInsets.only(top: 16.0),
-                      height: height(context) - 256,
-                      padding: const EdgeInsets.all(24.0),
-                      decoration: BoxDecoration(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.secondary.withOpacity(0.5),
-                        borderRadius: BorderRadius.circular(16),
+                    Expanded(
+                      child: Container(
+                        margin: const EdgeInsets.only(top: 16.0),
+                        padding: const EdgeInsets.all(24.0),
+                        decoration: BoxDecoration(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.secondary.withOpacity(0.5),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Center(child: diagram),
                       ),
-                      child: Center(child: diagram),
                     ),
                   ],
                 ),
@@ -163,6 +193,60 @@ class _MyProtocolPageState extends State<MyProtocolPage> {
           color: Theme.of(context).colorScheme.primary,
         ),
       ],
+    );
+  }
+}
+
+class PcapTable extends StatelessWidget {
+  final List<Map<String, dynamic>> packetData;
+
+  const PcapTable({super.key, required this.packetData});
+
+  @override
+  Widget build(BuildContext context) {
+    if (packetData.isEmpty) return Center(child: Text("No packets found"));
+
+    List<String> columns = packetData[0].keys.toList();
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: SizedBox(
+        child: SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child: DataTable(
+            headingRowColor: WidgetStateProperty.all(
+              Theme.of(context).colorScheme.primary,
+            ),
+            border: TableBorder.all(color: Colors.white30, width: 1),
+            columns: columns.map((key) {
+              return DataColumn(
+                label: PcapText(
+                  key.toUpperCase(),
+                  fontSize: 14,
+                  isBold: true,
+                  color: Theme.of(context).colorScheme.secondary,
+                ),
+              );
+            }).toList(),
+            rows: packetData.map((pkt) {
+              return DataRow(
+                color: WidgetStateProperty.all(
+                  Theme.of(context).colorScheme.secondary.withOpacity(0.5),
+                ),
+                cells: columns.map((key) {
+                  return DataCell(
+                    PcapText(
+                      pkt[key].toString(),
+                      fontSize: 12,
+                      color: Colors.white70,
+                    ),
+                  );
+                }).toList(),
+              );
+            }).toList(),
+          ),
+        ),
+      ),
     );
   }
 }

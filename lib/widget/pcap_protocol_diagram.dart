@@ -1,6 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:pcap_vision/widget/pcap_text.dart';
 
+class PcapProtocolDefinition {
+  String ethernet =
+      'Ethernet \nThe "Envelope." It is the most common physical layer protocol. It uses MAC Addresses (hardware IDs like 00:0a:95:9d:68:16) to move data between two devices connected to the same switch. If Ethernet fails, the "cable" is essentially unplugged.';
+  String arp =
+      'Address Resolution Protocol \nThe "Translator." Computers talk using IP addresses, but switches move data using MAC addresses. ARP is the shout a computer makes: "Who has IP 192.168.1.1? Tell MAC 44:95:3b..." It bridges the gap between Layer 3 and Layer 2.';
+  String ip =
+      'Internet Protocol \n The "Postal Service." Every packet has an IP header containing a Source and Destination IP. It is responsible for "Routing"—deciding which path a packet should take across the world to reach its target. It doesn\'t care if the packet gets lost; it just handles the address.';
+  String icmp =
+      'Internet Control Message Protocol \nThe "Reporting Agency." ICMP doesn\'t carry user data (like your messages). It carries Status data. When you ping a server, you are using ICMP. If a router is too busy, it sends an ICMP "Source Quench" or "Destination Unreachable" back to you.';
+  String tcp =
+      'Transmission Control Protocol \nThe "Certified Mail." It is Connection-Oriented. It uses a 3-Way Handshake (SYN, SYN-ACK, ACK) to start. If a packet is lost, TCP notices and sends it again. It ensures that if you download a file, it arrives 100% complete and in the right order.';
+  String udp =
+      'User Datagram Protocol \nThe "Fire and Forget." It is Connectionless. It just pours data onto the wire as fast as possible. If a packet is lost, it’s gone forever. This is why Zoom calls "glitch" instead of pausing—UDP is skipping the lost data to stay real-time.';
+  String tls =
+      'Transport Layer Security \nThe "Armored Truck." Formerly known as SSL, TLS wraps your TCP data in a layer of Encryption. Even if a hacker captures the packet in your app, they will only see "RAW" gibberish because TLS has scrambled the contents using complex math.';
+  String dhcp =
+      'Dynamic Host Configuration Protocol \nThe "Registrar." When you join a Wi-Fi network, your phone has no IP. It sends a DHCP request, and the router "leases" you an IP address for a few hours. Without this, you\'d have to manually configure every device\'s network settings.';
+  String dns =
+      'Domain Name System \nThe "Internet Phonebook." Humans remember google.com, but routers only understand 142.250.67.42. DNS is the service that looks up the name and returns the number. If DNS is down, the internet feels "broken" even if the wires are fine.';
+  String http =
+      'Hypertext Transfer Protocol \nThe "Secure Web." This is the protocol used for almost all web browsing today. It is actually HTTP + TLS. It allows your browser to request images, text, and videos while ensuring that the connection to the server is private and verified.';
+}
+
 class PcapProtocolDiagram {
   Widget field(
     BuildContext context,

@@ -25,6 +25,7 @@ class _PcapTextState extends State<PcapText> {
       widget.text,
       style: GoogleFonts.spaceGrotesk(
         textStyle: TextStyle(
+          letterSpacing: 0.5,
           color: widget.color,
           fontSize: widget.fontSize,
           fontWeight: widget.isBold ? FontWeight.bold : FontWeight.normal,

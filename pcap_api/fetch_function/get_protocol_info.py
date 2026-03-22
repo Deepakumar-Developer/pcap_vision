@@ -3,6 +3,8 @@ def get_protocol_info(protocol,pcap):
     protocol = protocol.upper()
     fields = []  # Initialize fields as an empty list to store field names
 
+    print(f"Fetching info for protocol: {pcap} with protocol: {protocol}")
+
     for pkt in pcap:
         if protocol in pkt:
             layer_data = pkt[protocol]
