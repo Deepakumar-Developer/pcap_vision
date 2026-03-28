@@ -35,21 +35,26 @@ def analyzePCAP(pcap_file, type):
         "packet_details": show_packets
     }
 
+index = 0
 def packet_to_dict(pkt):
+    global index
+    print(f"Analyzing packet: {index}")
+    index += 1
     data = {}
     layer = pkt
     while layer:
         # Get the layer name (e.g., 'IP', 'TCP')
         layer_name = layer.name
 
-        if layer_name in ["Raw", "Padding"]:
+        if layer_name in ["Raw", "Padding", "DNS", 'TLS', 'Encrypted Content'] or 'v2' in layer_name.lower() or 'v6' in layer_name.lower():
             # # For Raw and Padding layers, we want to capture the actual payload data
             # data[layer_name.upper()] = str(layer.load)  # Convert bytes to string for JSON
             layer = layer.payload if layer.payload.name != 'NoPayload' else None
             continue
 
         # Capture all defined fields for this specific layer
-        data[layer_name.upper()] = ast.literal_eval(str(layer.fields).replace("<", '"').replace(">", '"').replace("b'", "'"))  # Convert fields to string for better readability in JSON
+        print(f"{layer_name}: {layer.fields}")
+        data[layer_name.upper()] = ast.literal_eval(str(layer.fields).replace("[<", '"').replace(">]", '"').replace("<", '"').replace(">", '"').replace("b'", "'"))  # Convert fields to string for better readability in JSON
 
         layer = layer.payload if layer.payload.name != 'NoPayload' else None
 

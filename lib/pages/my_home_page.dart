@@ -281,6 +281,13 @@ class _MyHomePageState extends State<MyHomePage> {
                         PcapButton(
                           text: "Next",
                           onPressed: () async {
+                            if (hostController.text.isEmpty ||
+                                userController.text.isEmpty ||
+                                passwordController.text.isEmpty ||
+                                pathController.text.isEmpty) {
+                              msg(context, "Please fill remaining fields");
+                              return;
+                            }
                             setState(() {
                               isLoader = true;
                             });
@@ -355,9 +362,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                     inputDecorationTheme: const InputDecorationTheme(
                       filled: true,
-                      fillColor: Color(
-                        0xff1E293B,
-                      ), // Matches your sidebar color
+                      fillColor: Color(0xff1E293B),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(8)),
                         borderSide: BorderSide(
@@ -367,7 +372,6 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                     ),
                     onSelected: (String? value) {
-                      // This is where you get the value selected by the user
                       setState(() {
                         selectedInterface = value!;
                         ifaceIndex = interface.indexOf(selectedInterface) + 1;
@@ -396,16 +400,54 @@ class _MyHomePageState extends State<MyHomePage> {
                   SizedBox(height: 24),
                   PcapButton(
                     text: "Start Capture",
-                    onPressed: () {
+                    onPressed: () async {
                       setState(() {
                         isLoader = true;
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => MyResultPage(),
-                          ),
-                        );
                       });
+                      String outputFile = await PcapServer().getPCAP(
+                        hostController.text,
+                        userController.text,
+                        passwordController.text,
+                        pathController.text,
+                        ifaceIndex.toString(),
+                      );
+                      print("Output File: $outputFile");
+
+                      if (outputFile.startsWith("404")) {
+                        msg(context, "Error in Starting Capture");
+
+                        setState(() => isLoader = false);
+                        return;
+                      } else {
+                        msg(context, "Capture Completed: $outputFile");
+                      }
+                      await Future.delayed(Duration(seconds: 2));
+                      msg(context, "Fetching Analysis Results...");
+                      await Future.delayed(Duration(seconds: 2));
+
+                      List<Map<String, dynamic>> response = await PcapServer()
+                          .fetchPCAP(
+                            hostController.text,
+                            userController.text,
+                            passwordController.text,
+                            outputFile,
+                            'path',
+                          );
+                      if (response.isEmpty) {
+                        msg(context, "Error in Fetching Analysis");
+                        setState(() => isLoader = false);
+                        return;
+                      }
+                      for (var res in response) {
+                        print(res['route']);
+                        assignResponse(res['route'], res['data']);
+                      }
+                      setState(() => isLoader = false);
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => MyResultPage()),
+                      );
                     },
                     icon: Icons.search,
                   ),
@@ -460,5 +502,30 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ],
     );
+  }
+
+  void assignResponse(String route, Map<String, dynamic> responseBody) {
+    switch (route) {
+      case '':
+        setState(() => GetData().pcapData = responseBody);
+        break;
+      case '/metadata':
+        setState(() => GetData().metaData = responseBody);
+        break;
+      case '/ipAddress':
+        setState(() => GetData().ipAddrData = responseBody);
+        break;
+      case '/macAddress':
+        setState(() => GetData().macAddrData = responseBody);
+        break;
+      case '/get_protocols':
+        setState(() => GetData().protocolData = responseBody);
+        break;
+      case '/get_osi':
+        setState(() => GetData().osiLayerData = responseBody);
+        break;
+      default:
+        print("Unknown route: $route with response: $responseBody");
+    }
   }
 }

@@ -23,6 +23,8 @@ class _PcapTextState extends State<PcapText> {
   Widget build(BuildContext context) {
     return Text(
       widget.text,
+      maxLines: 10,
+      overflow: TextOverflow.ellipsis,
       style: GoogleFonts.spaceGrotesk(
         textStyle: TextStyle(
           letterSpacing: 0.5,

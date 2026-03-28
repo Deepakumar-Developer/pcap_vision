@@ -85,7 +85,11 @@ class LayerData {
 }
 
 class GetData {
-  Map<String, dynamic> metaData = {
+  static final GetData _instance = GetData._internal();
+  factory GetData() => _instance;
+  GetData._internal();
+
+  Map<String, dynamic> _metaData = {
     "msg": "metadata analysis complete",
     "session_info": {
       "average_data_rate_mbps": 0.035784219097990816,
@@ -108,7 +112,7 @@ class GetData {
     ],
   };
 
-  Map<String, dynamic> protocolData = {
+  Map<String, dynamic> _protocolData = {
     "msg": "protocol analysis complete",
     "protocols": [
       {"count": 134, "protocol": "Ethernet"},
@@ -126,7 +130,7 @@ class GetData {
     ],
   };
 
-  Map<String, dynamic> ipAddrData = {
+  Map<String, dynamic> _ipAddrData = {
     "ip_endpoint_info": {
       "conversations": [
         {
@@ -212,7 +216,7 @@ class GetData {
     "msg": "IP endpoint analysis complete",
   };
 
-  Map<String, dynamic> macAddrData = {
+  Map<String, dynamic> _macAddrData = {
     "mac_endpoint_info": {
       "conversations": [
         {
@@ -238,7 +242,7 @@ class GetData {
     "msg": "MAC endpoint analysis complete",
   };
 
-  Map<String, dynamic> osiLayerData = {
+  Map<String, dynamic> _osiLayerData = {
     "msg": "OSI layer mapping complete",
     "osi_mapping": {
       "0": {"count": 0, "data": []},
@@ -351,7 +355,7 @@ class GetData {
     },
   };
 
-  Map<String, dynamic> pcapData = {
+  Map<String, dynamic> _pcapData = {
     "msg": "analysis complete",
     "packet_details": [
       {
@@ -611,7 +615,7 @@ class GetData {
     ],
   };
 
-  Map<String, dynamic> protocolInfo = {
+  Map<String, dynamic> _protocolInfo = {
     "fields": [
       {
         "chksum": 43519,
@@ -677,4 +681,20 @@ class GetData {
     "msg": "protocol info fetched",
     "protocol": "IP",
   };
+
+  set metaData(Map<String, dynamic> val) => _metaData = val;
+  set protocolData(Map<String, dynamic> val) => _protocolData = val;
+  set ipAddrData(Map<String, dynamic> val) => _ipAddrData = val;
+  set macAddrData(Map<String, dynamic> val) => _macAddrData = val;
+  set osiLayerData(Map<String, dynamic> val) => _osiLayerData = val;
+  set pcapData(Map<String, dynamic> val) => _pcapData = val;
+  set protocolInfo(Map<String, dynamic> val) => _protocolInfo = val;
+
+  Map<String, dynamic> get metaData => _metaData;
+  Map<String, dynamic> get protocolData => _protocolData;
+  Map<String, dynamic> get ipAddrData => _ipAddrData;
+  Map<String, dynamic> get macAddrData => _macAddrData;
+  Map<String, dynamic> get osiLayerData => _osiLayerData;
+  Map<String, dynamic> get pcapData => _pcapData;
+  Map<String, dynamic> get protocolInfo => _protocolInfo;
 }

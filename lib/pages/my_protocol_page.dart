@@ -198,7 +198,7 @@ class _MyProtocolPageState extends State<MyProtocolPage> {
 }
 
 class PcapTable extends StatelessWidget {
-  final List<Map<String, dynamic>> packetData;
+  final List<dynamic> packetData;
 
   const PcapTable({super.key, required this.packetData});
 

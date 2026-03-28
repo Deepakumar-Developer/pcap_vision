@@ -91,6 +91,7 @@ def analyze():
         elif data and data.lower() == 'path':
             path = request.get_json().get('path')
             if not path:
+                print("No path provided in JSON body")
                 return jsonify({"error": "No path provided in JSON body"}), 400
             result = analyzePCAP(path, data.lower())
             return jsonify(result), 200

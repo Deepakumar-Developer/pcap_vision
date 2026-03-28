@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:pcap_vision/function/server_function.dart';
 import 'package:pcap_vision/pages/my_protocol_page.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:pcap_vision/function/app_function.dart';
@@ -912,7 +913,7 @@ class _SummaryWidgetState extends State<SummaryWidget> {
 
 class ProtocolWidget extends StatefulWidget {
   final Map<String, dynamic> protocolData;
-  final List<Map<String, dynamic>> data;
+  final List<dynamic> data;
   const ProtocolWidget({
     super.key,
     required this.protocolData,
@@ -924,65 +925,90 @@ class ProtocolWidget extends StatefulWidget {
 }
 
 class _ProtocolWidgetState extends State<ProtocolWidget> {
-  Map<String, dynamic> protocolInfo = GetData().protocolInfo;
+  bool isloader = false;
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: 8,
+    return Stack(
+      alignment: Alignment.center,
       children: [
-        PcapText("Protocol Analysis", fontSize: 18, isBold: true),
-        SizedBox(height: 8),
-        Expanded(
-          child: SizedBox(
-            width: double.infinity,
-            child: ListView.builder(
-              itemBuilder: (context, index) {
-                final protocol = widget.protocolData['protocols'][index];
-                return MouseRegion(
-                  cursor: SystemMouseCursors.click,
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => MyProtocolPage(
-                            protocolName: protocol['protocol'],
-                            protocolInfo: protocolInfo,
-                            count: protocol['count'],
+        Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 8,
+          children: [
+            PcapText("Protocol Analysis", fontSize: 18, isBold: true),
+            SizedBox(height: 8),
+            Expanded(
+              child: SizedBox(
+                width: double.infinity,
+                child: ListView.builder(
+                  itemBuilder: (context, index) {
+                    final protocol = widget.protocolData['protocols'][index];
+                    return MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      child: GestureDetector(
+                        onTap: () async {
+                          setState(() {
+                            isloader = true;
+                          });
+                          Map<String, dynamic> protocolInfo = await PcapServer()
+                              .getprotocolData(
+                                protocol['protocol'],
+                                widget.data,
+                              );
+                          setState(() {
+                            isloader = false;
+                            GetData().protocolInfo = protocolInfo;
+                          });
+                          if (protocolInfo.isEmpty) {
+                            msg(
+                              context,
+                              "No data available for ${protocol['protocol']}",
+                            );
+                            return;
+                          }
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => MyProtocolPage(
+                                protocolName: protocol['protocol'],
+                                protocolInfo: GetData().protocolInfo,
+                                count: protocol['count'],
+                              ),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          padding: EdgeInsets.all(8),
+                          margin: EdgeInsets.only(bottom: 4),
+                          decoration: BoxDecoration(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.primary.withOpacity(0.05),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              PcapText(protocol['protocol'], fontSize: 12),
+                              Icon(
+                                Icons.arrow_forward_ios,
+                                size: 12,
+                                color: Colors.white54,
+                              ),
+                            ],
                           ),
                         ),
-                      );
-                    },
-                    child: Container(
-                      padding: EdgeInsets.all(8),
-                      margin: EdgeInsets.only(bottom: 4),
-                      decoration: BoxDecoration(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.primary.withOpacity(0.05),
-                        borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          PcapText(protocol['protocol'], fontSize: 12),
-                          Icon(
-                            Icons.arrow_forward_ios,
-                            size: 12,
-                            color: Colors.white54,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
-              itemCount: widget.protocolData['protocols'].length,
+                    );
+                  },
+                  itemCount: widget.protocolData['protocols'].length,
+                ),
+              ),
             ),
-          ),
+          ],
         ),
+        Visibility(visible: isloader, child: pcapLoader(context)),
       ],
     );
   }

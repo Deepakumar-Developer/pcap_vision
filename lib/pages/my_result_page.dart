@@ -23,6 +23,8 @@ class _MyResultPageState extends State<MyResultPage> {
 
   @override
   Widget build(BuildContext context) {
+    print('result page build');
+
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: pcapAppBar(context),
