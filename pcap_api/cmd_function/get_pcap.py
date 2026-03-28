@@ -10,7 +10,7 @@ def get_pcap(hostname, username, password, tshark_path, index):
     client.connect(hostname=hostname, username=username, password=password, timeout=60, look_for_keys=False, allow_agent=False, banner_timeout=200, auth_timeout=60)
 
     output_file = r'C:\Users\Deepakumar M\Desktop\capture.pcap'
-    command = f'"{tshark_path}" -i {index} -a duration:10 -w "{output_file}"'
+    command = f'"{tshark_path.strip()}" -i {index} -a duration:10 -w "{output_file}"'
 
     # 3. Execute with a PTY to handle sudo password prompt if needed
     stdin, stdout, stderr = client.exec_command(command, get_pty=True)
@@ -18,7 +18,7 @@ def get_pcap(hostname, username, password, tshark_path, index):
     response = stdout.read().decode()
 
     if stderr.read() != b'':
-        raise Exception("Error retrieving interface list: " + str(stderr.read()))
+        raise Exception("Error in Capture Pcap: " + str(stderr.read()))
     
     client.close()
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pcap_vision/function/app_function.dart';
+import 'package:pcap_vision/function/server_function.dart';
 import 'package:pcap_vision/pages/my_result_page.dart';
 import 'package:pcap_vision/widget/pcap_button.dart';
 import 'package:pcap_vision/widget/pcap_input.dart';
@@ -22,6 +23,7 @@ class _MyHomePageState extends State<MyHomePage> {
   TextEditingController pathController = TextEditingController();
   String selectedInterface = "Wi-Fi";
   List<String> interface = ['Ethernet', 'Wi-Fi', 'Loopback', 'Bluetooth'];
+  late int ifaceIndex = interface.indexOf("Wi-Fi") + 1;
   bool showCaptureInput = false,
       showInterfaceSelection = false,
       isLoader = false,
@@ -246,14 +248,64 @@ class _MyHomePageState extends State<MyHomePage> {
                           icon: Icons.folder,
                         ),
                         SizedBox(height: 4),
-                        PcapTextButton(onPressed: () {}, text: "Get path"),
+                        PcapTextButton(
+                          onPressed: () async {
+                            if (hostController.text.isEmpty ||
+                                userController.text.isEmpty ||
+                                passwordController.text.isEmpty) {
+                              msg(context, "Please fill remaining fields");
+                              return;
+                            }
+                            setState(() {
+                              isLoader = true;
+                              pathController.text = "Fetching path...";
+                            });
+                            String path = await PcapServer().getPath(
+                              hostController.text,
+                              userController.text,
+                              passwordController.text,
+                            );
+                            setState(() {
+                              isLoader = false;
+                              if (path.startsWith("404")) {
+                                pathController.text = "";
+                                msg(context, "Error in Finding Path");
+                              } else {
+                                pathController.text = path;
+                              }
+                            });
+                          },
+                          text: "Get path",
+                        ),
                         SizedBox(height: 24),
                         PcapButton(
                           text: "Next",
-                          onPressed: () {
+                          onPressed: () async {
                             setState(() {
-                              showCaptureInput = true;
-                              showInterfaceSelection = true;
+                              isLoader = true;
+                            });
+                            List<List<String>> iface = await PcapServer()
+                                .getInterface(
+                                  hostController.text,
+                                  userController.text,
+                                  passwordController.text,
+                                  pathController.text,
+                                );
+                            print(iface);
+                            setState(() {
+                              isLoader = false;
+                              print(iface.first.first);
+                              if (iface.isNotEmpty &&
+                                  !iface.first.first.startsWith("404")) {
+                                interface = [];
+                                for (var i in iface) {
+                                  interface.add(i.last);
+                                }
+                                showCaptureInput = true;
+                                showInterfaceSelection = true;
+                              } else {
+                                msg(context, "Error in Fetching Interfaces");
+                              }
                             });
                           },
                           icon: Icons.arrow_forward,
@@ -293,7 +345,14 @@ class _MyHomePageState extends State<MyHomePage> {
                         fontSize: 12,
                       ),
                     ),
-
+                    menuStyle: MenuStyle(
+                      backgroundColor: WidgetStateProperty.all(
+                        const Color(0xff1E293B),
+                      ),
+                      surfaceTintColor: WidgetStateProperty.all(
+                        Colors.transparent,
+                      ),
+                    ),
                     inputDecorationTheme: const InputDecorationTheme(
                       filled: true,
                       fillColor: Color(
@@ -311,8 +370,11 @@ class _MyHomePageState extends State<MyHomePage> {
                       // This is where you get the value selected by the user
                       setState(() {
                         selectedInterface = value!;
+                        ifaceIndex = interface.indexOf(selectedInterface) + 1;
                       });
-                      print("Selected Interface: $selectedInterface");
+                      print(
+                        "Selected Interface: $selectedInterface (Index: $ifaceIndex)",
+                      );
                     },
                     dropdownMenuEntries: interface
                         .map<DropdownMenuEntry<String>>((String value) {

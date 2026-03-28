@@ -5,9 +5,11 @@ def get_interfance(hostname, username, password, tshark_path):
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy()) # Automatically add unknown host keys
     client.connect(hostname=hostname, username=username, password=password, timeout=60, look_for_keys=False, allow_agent=False, banner_timeout=200, auth_timeout=60)
-
-    stdin, stdout, stderr = client.exec_command(f'"{tshark_path}" -D')
-    output = stdout.read().decode()
+    print('SSH connection established to ' + hostname)
+    stdin, stdout, stderr = client.exec_command(f'"{tshark_path.strip()}" -D')
+    print('Command executed: ' + f'{tshark_path.strip()}" -D')
+    
+    output = stdout.read().decode('utf-8')
 
     if stderr.read() != b'':
         raise Exception("Error retrieving interface list: " + str(stderr.read()))

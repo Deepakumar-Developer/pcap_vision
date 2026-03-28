@@ -1,6 +1,9 @@
 import 'package:file_picker/file_picker.dart';
 import 'dart:typed_data';
 
+import 'package:flutter/material.dart';
+import 'package:pcap_vision/widget/pcap_text.dart';
+
 String? fileName;
 
 Future<bool> pickFile() async {
@@ -23,6 +26,16 @@ bool processFile(String name, Uint8List? bytes) {
   return true;
   // Here you would call your analyze() function
   // and pass the bytes to your Flask API
+}
+
+void msg(BuildContext context, String text) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: PcapText(text, fontSize: 12),
+      padding: EdgeInsets.all(16),
+      backgroundColor: Theme.of(context).colorScheme.surface,
+    ),
+  );
 }
 
 // Matadata and Protocol Data Models
