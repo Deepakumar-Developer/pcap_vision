@@ -21,15 +21,12 @@ class PcapServer {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        print("Success: ${response.body}");
         final data = jsonDecode(response.body);
         return data['path'];
       } else {
-        print("Server Error: ${response.statusCode}");
         return "404 Error: ${response.statusCode}";
       }
     } catch (e) {
-      print("Connection Error: $e");
       return "404 Connection Error: $e";
     }
   }
@@ -58,19 +55,16 @@ class PcapServer {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        print("Success: ${response.body}");
         final data = jsonDecode(response.body);
         return (data['interface'] as List)
             .map((item) => List<String>.from(item))
             .toList();
       } else {
-        print("Server Error: ${response.statusCode}");
         return [
           ["404 Error: ${response.statusCode}"],
         ];
       }
     } catch (e) {
-      print("Connection Error: $e");
       return [
         ["404 Connection Error: $e"],
       ];
@@ -103,15 +97,12 @@ class PcapServer {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        print("Success: ${response.body}");
         final data = jsonDecode(response.body);
         return data['output_file'];
       } else {
-        print("Server Error: ${response.statusCode}");
         return "404 Error: ${response.statusCode}";
       }
     } catch (e) {
-      print("Connection Error: $e");
       return "404 Connection Error: $e";
     }
   }
@@ -132,7 +123,6 @@ class PcapServer {
 
     for (var route in routes) {
       final url = Uri.parse('$baseUrl/analyze$route?type=$type');
-      print(url);
       try {
         final response = await http.post(
           url,
@@ -150,11 +140,9 @@ class PcapServer {
           });
           await Future.delayed(Duration(seconds: 1));
         } else {
-          print("Server responded with status ${response.statusCode} at $url");
           return [];
         }
       } catch (e) {
-        print("Failed to connect to server at $url: $e");
         return [];
       }
     }
@@ -178,7 +166,6 @@ class PcapServer {
 
     for (var route in routes) {
       final url = Uri.parse('$baseUrl/analyze$route?type=$type');
-      print(url);
       try {
         var request = http.MultipartRequest('POST', url);
 
@@ -201,11 +188,9 @@ class PcapServer {
           });
           await Future.delayed(Duration(seconds: 1));
         } else {
-          print("Server responded with status ${response.statusCode} at $url");
           return [];
         }
       } catch (e) {
-        print("Failed to connect to server at $url: $e");
         return [];
       }
     }
@@ -229,15 +214,12 @@ class PcapServer {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        print("Success: ${response.body}");
         final data = jsonDecode(response.body);
         return data as Map<String, dynamic>;
       } else {
-        print("Server Error: ${response.statusCode}");
         return {};
       }
     } catch (e) {
-      print("Connection Error: $e");
       return {};
     }
   }

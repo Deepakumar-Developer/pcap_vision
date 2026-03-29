@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use, use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:pcap_vision/function/app_function.dart';
 import 'package:pcap_vision/function/server_function.dart';
@@ -108,14 +110,12 @@ class _MyHomePageState extends State<MyHomePage> {
                                   file.name,
                                   bytes,
                                 );
-                                print("File picking result: $response");
                                 if (response.isEmpty) {
                                   msg(context, "Error in Fetching Analysis");
                                   setState(() => isLoader = false);
                                   return;
                                 }
                                 for (var res in response) {
-                                  print(res['route']);
                                   assignResponse(res['route'], res['data']);
                                 }
                                 setState(() => isLoader = false);
@@ -321,10 +321,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                   passwordController.text,
                                   pathController.text,
                                 );
-                            print(iface);
                             setState(() {
                               isLoader = false;
-                              print(iface.first.first);
                               if (iface.isNotEmpty &&
                                   !iface.first.first.startsWith("404")) {
                                 interface = [];
@@ -398,9 +396,6 @@ class _MyHomePageState extends State<MyHomePage> {
                         selectedInterface = value!;
                         ifaceIndex = interface.indexOf(selectedInterface) + 1;
                       });
-                      print(
-                        "Selected Interface: $selectedInterface (Index: $ifaceIndex)",
-                      );
                     },
                     dropdownMenuEntries: interface
                         .map<DropdownMenuEntry<String>>((String value) {
@@ -433,7 +428,6 @@ class _MyHomePageState extends State<MyHomePage> {
                         pathController.text,
                         ifaceIndex.toString(),
                       );
-                      print("Output File: $outputFile");
 
                       if (outputFile.startsWith("404")) {
                         msg(context, "Error in Starting Capture");
@@ -455,7 +449,6 @@ class _MyHomePageState extends State<MyHomePage> {
                         return;
                       }
                       for (var res in response) {
-                        print(res['route']);
                         assignResponse(res['route'], res['data']);
                       }
                       setState(() => isLoader = false);
@@ -541,7 +534,6 @@ class _MyHomePageState extends State<MyHomePage> {
         setState(() => GetData().osiLayerData = responseBody);
         break;
       default:
-        print("Unknown route: $route with response: $responseBody");
     }
   }
 }

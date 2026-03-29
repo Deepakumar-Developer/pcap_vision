@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_getters_setters
+
 import 'package:file_picker/file_picker.dart';
 import 'dart:typed_data';
 
@@ -22,14 +24,12 @@ Future<List<dynamic>> pickFile() async {
 
 Future<List<dynamic>> processFile(String name, Uint8List? bytes) async {
   fileName = name;
-  print("File Selected: $name");
 
   List<dynamic> response = await PcapServer().fetchPCAPfromBytes(
     bytes!,
     name,
     'bytes',
   );
-  print(response);
 
   return response;
 }

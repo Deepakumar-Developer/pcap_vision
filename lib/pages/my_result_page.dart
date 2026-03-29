@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:pcap_vision/function/app_function.dart';
 import 'package:pcap_vision/widget/pcap_button.dart';
@@ -23,8 +25,6 @@ class _MyResultPageState extends State<MyResultPage> {
 
   @override
   Widget build(BuildContext context) {
-    print('result page build');
-
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: pcapAppBar(context),

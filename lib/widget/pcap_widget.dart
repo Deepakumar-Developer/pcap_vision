@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use, use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -104,14 +106,12 @@ class _PcapUploadAreaState extends State<PcapUploadArea> {
                 onPressed: () async {
                   setState(() => isLoader = true);
                   List<dynamic> response = await pickFile();
-                  print("File picking result: $response");
                   if (response.isEmpty) {
                     msg(context, "Error in Fetching Analysis");
                     setState(() => isLoader = false);
                     return;
                   }
                   for (var res in response) {
-                    print(res['route']);
                     assignResponse(res['route'], res['data']);
                   }
                   setState(() => isLoader = false);
@@ -166,7 +166,6 @@ class _PcapUploadAreaState extends State<PcapUploadArea> {
         setState(() => GetData().osiLayerData = responseBody);
         break;
       default:
-        print("Unknown route: $route with response: $responseBody");
     }
   }
 }

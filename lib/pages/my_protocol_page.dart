@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:pcap_vision/widget/pcap_protocol_diagram.dart';
 import 'package:pcap_vision/widget/pcap_text.dart';
@@ -37,7 +39,6 @@ class _MyProtocolPageState extends State<MyProtocolPage> {
 
   @override
   Widget build(BuildContext context) {
-    print('protocol page build for ${widget.protocolName}');
     if (widget.protocolName.toLowerCase() == 'ethernet') {
       setState(() {
         diagram = frameDiagram.ethernet(context);
