@@ -3,7 +3,7 @@ import 'package:pcap_vision/widget/pcap_text.dart';
 
 class PcapProtocolDefinition {
   String ethernet =
-      'Ethernet \nThe "Envelope." It is the most common physical layer protocol. It uses MAC Addresses (hardware IDs like 00:0a:95:9d:68:16) to move data between two devices connected to the same switch. If Ethernet fails, the "cable" is essentially unplugged.';
+      'Ethernet \nThe "Envelope." It is the most common Data Link layer protocol. It uses MAC Addresses (hardware IDs like 00:0a:95:9d:68:16) to move data between two devices connected to the same switch. If Ethernet fails, the "cable" is essentially unplugged.';
   String arp =
       'Address Resolution Protocol \nThe "Translator." Computers talk using IP addresses, but switches move data using MAC addresses. ARP is the shout a computer makes: "Who has IP 192.168.1.1? Tell MAC 44:95:3b..." It bridges the gap between Layer 3 and Layer 2.';
   String ip =
@@ -21,7 +21,7 @@ class PcapProtocolDefinition {
   String dns =
       'Domain Name System \nThe "Internet Phonebook." Humans remember google.com, but routers only understand 142.250.67.42. DNS is the service that looks up the name and returns the number. If DNS is down, the internet feels "broken" even if the wires are fine.';
   String http =
-      'Hypertext Transfer Protocol \nThe "Secure Web." This is the protocol used for almost all web browsing today. It is actually HTTP + TLS. It allows your browser to request images, text, and videos while ensuring that the connection to the server is private and verified.';
+      'Hypertext Transfer Protocol \nThe "Web Language." HTTP is used to transfer web content like text, images, and videos between a browser and a server. It is not secure by default. When combined with TLS, it becomes HTTPS, which is secure.';
 }
 
 class PcapProtocolDiagram {

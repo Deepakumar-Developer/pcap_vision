@@ -1,7 +1,7 @@
+import 'dart:typed_data';
+
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
-import 'package:pcap_vision/function/app_function.dart';
 
 class PcapServer {
   // Use 10.0.2.2 if using Android Emulator, or your local IP for Web/Physical devices
@@ -117,9 +117,6 @@ class PcapServer {
   }
 
   Future<List<Map<String, dynamic>>> fetchPCAP(
-    String host,
-    String user,
-    String password,
     String remotePath,
     String type,
   ) async {
@@ -143,13 +140,59 @@ class PcapServer {
             "Content-Type": "application/json",
             "Accept": "application/json",
           },
-          body: jsonEncode({
-            "host": host,
-            "user": user,
-            "pwd": password,
-            "path": remotePath.trim(),
-          }),
+          body: jsonEncode({"path": remotePath.trim()}),
         );
+
+        if (response.statusCode == 200) {
+          results.add({
+            'route': route,
+            'data': jsonDecode(response.body) as Map<String, dynamic>,
+          });
+          await Future.delayed(Duration(seconds: 1));
+        } else {
+          print("Server responded with status ${response.statusCode} at $url");
+          return [];
+        }
+      } catch (e) {
+        print("Failed to connect to server at $url: $e");
+        return [];
+      }
+    }
+    return results;
+  }
+
+  Future<List<Map<String, dynamic>>> fetchPCAPfromBytes(
+    Uint8List pcapBytes,
+    String name,
+    String type,
+  ) async {
+    List<String> routes = [
+      '',
+      '/metadata',
+      '/ipAddress',
+      '/macAddress',
+      '/get_protocols',
+      '/get_osi',
+    ];
+    List<Map<String, dynamic>> results = [];
+
+    for (var route in routes) {
+      final url = Uri.parse('$baseUrl/analyze$route?type=$type');
+      print(url);
+      try {
+        var request = http.MultipartRequest('POST', url);
+
+        // Use fromBytes to create the file object for the multipart request
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'file', // Must match your Python: request.files['file']
+            pcapBytes,
+            filename: name,
+          ),
+        );
+
+        var streamedResponse = await request.send();
+        var response = await http.Response.fromStream(streamedResponse);
 
         if (response.statusCode == 200) {
           results.add({

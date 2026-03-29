@@ -20,7 +20,8 @@ class MyProtocolPage extends StatefulWidget {
 
 class _MyProtocolPageState extends State<MyProtocolPage> {
   PcapProtocolDiagram frameDiagram = PcapProtocolDiagram();
-  String definition = 'We are working on fetching the protocol definition...';
+  String definition =
+      'Oops!\nWe are working on fetching the protocol definition...';
   Widget diagram = Center(
     child: Column(
       mainAxisAlignment: .center,
@@ -36,6 +37,7 @@ class _MyProtocolPageState extends State<MyProtocolPage> {
 
   @override
   Widget build(BuildContext context) {
+    print('protocol page build for ${widget.protocolName}');
     if (widget.protocolName.toLowerCase() == 'ethernet') {
       setState(() {
         diagram = frameDiagram.ethernet(context);
@@ -112,7 +114,11 @@ class _MyProtocolPageState extends State<MyProtocolPage> {
                           fontSize: 24,
                           isBold: true,
                         ),
-                        PcapText(definition.split('\n')[1], fontSize: 16),
+                        PcapText(
+                          definition.split('\n')[1],
+                          fontSize: 16,
+                          textAlign: .left,
+                        ),
                       ],
                     ),
                     Expanded(

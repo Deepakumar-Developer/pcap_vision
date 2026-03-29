@@ -2,11 +2,12 @@ import 'package:file_picker/file_picker.dart';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:pcap_vision/function/server_function.dart';
 import 'package:pcap_vision/widget/pcap_text.dart';
 
 String? fileName;
 
-Future<bool> pickFile() async {
+Future<List<dynamic>> pickFile() async {
   FilePickerResult? result = await FilePicker.platform.pickFiles(
     type: FileType.custom,
     allowedExtensions: ['pcap', 'pcapng', 'cap'],
@@ -14,24 +15,29 @@ Future<bool> pickFile() async {
   );
 
   if (result != null) {
-    return processFile(result.files.first.name, result.files.first.bytes);
+    return await processFile(result.files.first.name, result.files.first.bytes);
   }
-  return false;
+  return [];
 }
 
-bool processFile(String name, Uint8List? bytes) {
+Future<List<dynamic>> processFile(String name, Uint8List? bytes) async {
   fileName = name;
   print("File Selected: $name");
 
-  return true;
-  // Here you would call your analyze() function
-  // and pass the bytes to your Flask API
+  List<dynamic> response = await PcapServer().fetchPCAPfromBytes(
+    bytes!,
+    name,
+    'bytes',
+  );
+  print(response);
+
+  return response;
 }
 
 void msg(BuildContext context, String text) {
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
-      content: PcapText(text, fontSize: 12),
+      content: PcapText(text, fontSize: 12, textAlign: .left),
       padding: EdgeInsets.all(16),
       backgroundColor: Theme.of(context).colorScheme.surface,
     ),

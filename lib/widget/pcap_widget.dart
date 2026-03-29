@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:pcap_vision/function/server_function.dart';
+import 'package:pcap_vision/pages/my_about_page.dart';
+import 'package:pcap_vision/pages/my_help_page.dart';
 import 'package:pcap_vision/pages/my_protocol_page.dart';
+import 'package:pcap_vision/pages/my_result_page.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:pcap_vision/function/app_function.dart';
 import 'package:pcap_vision/widget/pcap_button.dart';
@@ -13,69 +16,159 @@ double height(BuildContext context) => MediaQuery.of(context).size.height;
 
 double width(BuildContext context) => MediaQuery.of(context).size.width;
 
-PreferredSizeWidget pcapAppBar(BuildContext context) => AppBar(
-  title: PcapText("Pcap Vision", fontSize: 20),
-  elevation: 0,
-  scrolledUnderElevation: 0,
-  surfaceTintColor: Colors.transparent,
-  backgroundColor: Theme.of(context).colorScheme.surface,
-  automaticallyImplyLeading: false,
-  actions: [
-    PcapTextButton(onPressed: () {}, text: "About"),
-    SizedBox(width: 24),
-    PcapTextButton(onPressed: () {}, text: "Documentation"),
-    SizedBox(width: 24),
-    Image.asset("assets/appIcon.png", width: 24, height: 24),
-    SizedBox(width: 24),
-  ],
-);
-
-Widget pcapUploadArea(BuildContext context) {
-  return Container(
-    height: 250,
-    width: double.infinity,
-    decoration: BoxDecoration(
-      color: Theme.of(context).colorScheme.secondary,
-      borderRadius: BorderRadius.circular(16),
-      border: Border.all(
-        color: Theme.of(context).colorScheme.primary.withOpacity(0.25),
-        width: 2,
-        style: BorderStyle.solid,
-      ),
-    ),
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(
-          Icons.upload_file,
-          size: 64,
-          color: Theme.of(context).colorScheme.primary,
+PreferredSizeWidget pcapAppBar(BuildContext context, {String page = ''}) =>
+    AppBar(
+      title: PcapText("Pcap Vision", fontSize: 20),
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      surfaceTintColor: Colors.transparent,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      automaticallyImplyLeading: false,
+      actions: [
+        PcapTextButton(
+          onPressed: () {
+            if (page == 'about') return;
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => MyAboutPage()),
+            );
+          },
+          text: "About",
         ),
-        SizedBox(height: 16),
-        Text(
-          "Drag and drop your file here",
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w500,
+        SizedBox(width: 24),
+        PcapTextButton(
+          onPressed: () {
+            if (page == 'help') return;
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => MyHelpPage()),
+            );
+          },
+          text: "Documentation",
+        ),
+        SizedBox(width: 24),
+        Image.asset("assets/appIcon.png", width: 24, height: 24),
+        SizedBox(width: 24),
+      ],
+    );
+
+class PcapUploadArea extends StatefulWidget {
+  const PcapUploadArea({super.key});
+
+  @override
+  State<PcapUploadArea> createState() => _PcapUploadAreaState();
+}
+
+class _PcapUploadAreaState extends State<PcapUploadArea> {
+  bool isLoader = false;
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Container(
+          height: 250,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.secondary,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.25),
+              width: 2,
+              style: BorderStyle.solid,
+            ),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.upload_file,
+                size: 64,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              SizedBox(height: 16),
+              Text(
+                "Drag and drop your file here",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              Text(
+                "Upload .pcap or .pcapng formats",
+                style: TextStyle(color: Colors.white54, fontSize: 14),
+              ),
+              SizedBox(height: 20),
+              PcapButton(
+                text: "Browse Files",
+                onPressed: () async {
+                  setState(() => isLoader = true);
+                  List<dynamic> response = await pickFile();
+                  print("File picking result: $response");
+                  if (response.isEmpty) {
+                    msg(context, "Error in Fetching Analysis");
+                    setState(() => isLoader = false);
+                    return;
+                  }
+                  for (var res in response) {
+                    print(res['route']);
+                    assignResponse(res['route'], res['data']);
+                  }
+                  setState(() => isLoader = false);
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => MyResultPage()),
+                  );
+                },
+                width: 250,
+              ),
+            ],
           ),
         ),
-        Text(
-          "Upload .pcap or .pcapng formats",
-          style: TextStyle(color: Colors.white54, fontSize: 14),
-        ),
-        SizedBox(height: 20),
-        PcapButton(
-          text: "Browse Files",
-          onPressed: () async {
-            bool success = await pickFile();
-            print("File picking result: $success");
-          },
-          width: 250,
+        Visibility(
+          visible: isLoader,
+          child: Container(
+            height: 250,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+            ),
+            alignment: Alignment.center,
+            child: LoadingAnimationWidget.halfTriangleDot(
+              color: Theme.of(context).colorScheme.primary,
+              size: 40,
+            ),
+          ),
         ),
       ],
-    ),
-  );
+    );
+  }
+
+  void assignResponse(String route, Map<String, dynamic> responseBody) {
+    switch (route) {
+      case '':
+        setState(() => GetData().pcapData = responseBody);
+        break;
+      case '/metadata':
+        setState(() => GetData().metaData = responseBody);
+        break;
+      case '/ipAddress':
+        setState(() => GetData().ipAddrData = responseBody);
+        break;
+      case '/macAddress':
+        setState(() => GetData().macAddrData = responseBody);
+        break;
+      case '/get_protocols':
+        setState(() => GetData().protocolData = responseBody);
+        break;
+      case '/get_osi':
+        setState(() => GetData().osiLayerData = responseBody);
+        break;
+      default:
+        print("Unknown route: $route with response: $responseBody");
+    }
+  }
 }
 
 Widget pcapCaptureArea(
@@ -944,6 +1037,7 @@ class _ProtocolWidgetState extends State<ProtocolWidget> {
                 child: ListView.builder(
                   itemBuilder: (context, index) {
                     final protocol = widget.protocolData['protocols'][index];
+
                     return MouseRegion(
                       cursor: SystemMouseCursors.click,
                       child: GestureDetector(
@@ -958,15 +1052,16 @@ class _ProtocolWidgetState extends State<ProtocolWidget> {
                               );
                           setState(() {
                             isloader = false;
+                            if (protocolInfo.isEmpty) {
+                              msg(
+                                context,
+                                "No data available for ${protocol['protocol']}",
+                              );
+                              return;
+                            }
+
                             GetData().protocolInfo = protocolInfo;
                           });
-                          if (protocolInfo.isEmpty) {
-                            msg(
-                              context,
-                              "No data available for ${protocol['protocol']}",
-                            );
-                            return;
-                          }
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -990,7 +1085,10 @@ class _ProtocolWidgetState extends State<ProtocolWidget> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              PcapText(protocol['protocol'], fontSize: 12),
+                              PcapText(
+                                protocol['protocol'].split(' ')[0],
+                                fontSize: 12,
+                              ),
                               Icon(
                                 Icons.arrow_forward_ios,
                                 size: 12,

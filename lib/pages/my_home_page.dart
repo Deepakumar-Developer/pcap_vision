@@ -95,6 +95,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             PcapText(
                               "Import your pcap files and start analyzing your network traffic with Pcap vision.",
                               fontSize: 14,
+                              textAlign: .left,
                             ),
                             SizedBox(height: 24),
                             DropTarget(
@@ -102,7 +103,29 @@ class _MyHomePageState extends State<MyHomePage> {
                                 setState(() => isLoader = true);
                                 final file = detail.files.first;
                                 final bytes = await file.readAsBytes();
-                                processFile(file.name, bytes);
+
+                                List<dynamic> response = await processFile(
+                                  file.name,
+                                  bytes,
+                                );
+                                print("File picking result: $response");
+                                if (response.isEmpty) {
+                                  msg(context, "Error in Fetching Analysis");
+                                  setState(() => isLoader = false);
+                                  return;
+                                }
+                                for (var res in response) {
+                                  print(res['route']);
+                                  assignResponse(res['route'], res['data']);
+                                }
+                                setState(() => isLoader = false);
+
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => MyResultPage(),
+                                  ),
+                                );
                               },
                               onDragEntered: (detail) =>
                                   setState(() => isDragging = true),
@@ -110,7 +133,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                   setState(() => isDragging = false),
                               child: Stack(
                                 children: [
-                                  pcapUploadArea(context),
+                                  PcapUploadArea(),
                                   Visibility(
                                     visible: isDragging,
                                     child: Container(
@@ -285,7 +308,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 userController.text.isEmpty ||
                                 passwordController.text.isEmpty ||
                                 pathController.text.isEmpty) {
-                              msg(context, "Please fill remaining fields");
+                              msg(context, "Please fill all fields");
                               return;
                             }
                             setState(() {
@@ -341,7 +364,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 children: [
                   PcapText("Select Interface", fontSize: 14),
                   SizedBox(height: 24),
-                  // Example: Selecting a Network Interface for your capture
                   DropdownMenu<String>(
                     initialSelection: "Ethernet",
                     label: const Text("Select Interface"),
@@ -426,13 +448,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       await Future.delayed(Duration(seconds: 2));
 
                       List<Map<String, dynamic>> response = await PcapServer()
-                          .fetchPCAP(
-                            hostController.text,
-                            userController.text,
-                            passwordController.text,
-                            outputFile,
-                            'path',
-                          );
+                          .fetchPCAP(outputFile, 'path');
                       if (response.isEmpty) {
                         msg(context, "Error in Fetching Analysis");
                         setState(() => isLoader = false);

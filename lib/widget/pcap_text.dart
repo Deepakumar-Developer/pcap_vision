@@ -6,12 +6,14 @@ class PcapText extends StatefulWidget {
   final double fontSize;
   final Color color;
   final bool isBold;
+  final TextAlign textAlign;
   const PcapText(
     this.text, {
     super.key,
     required this.fontSize,
     this.color = Colors.white,
     this.isBold = false,
+    this.textAlign = TextAlign.left,
   });
 
   @override
@@ -25,6 +27,7 @@ class _PcapTextState extends State<PcapText> {
       widget.text,
       maxLines: 10,
       overflow: TextOverflow.ellipsis,
+      textAlign: widget.textAlign,
       style: GoogleFonts.spaceGrotesk(
         textStyle: TextStyle(
           letterSpacing: 0.5,
