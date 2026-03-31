@@ -8,24 +8,28 @@ def analyzePCAP(pcap_file, type):
 
     if type == 'path':
         if not os.path.exists(pcap_file):
+            print(f"File not found: {pcap_file}")
             raise FileNotFoundError(f"The file at {pcap_file} was not found.")
         fileData = pcap_file
+        print(fileData)
+
     elif type == 'bytes':
         fileData = io.BytesIO(pcap_file)
     else:
         raise ValueError("Invalid type specified. Must be 'path' or 'bytes'.")
     
     packets = rdpcap(fileData)
+    print(len(packets))
+    
 
-    if len(packets) > 1000:
-        raise ValueError(f"File too large: {len(packets)} packets. Maximum allowed is 1000.")
+    if len(packets) > 2000:
+        raise ValueError(f"File too large: {len(packets)} packets. Maximum allowed is 2000.")
     
     if len(packets) > 0:
         first_packet = packets[0]
         # Check if the packet has Wireless-specific layers
         if first_packet.haslayer(RadioTap) or first_packet.haslayer(Dot11):
             raise ValueError("Monitor Mode packets detected. Only standard Interface Mode (Ethernet) captures are supported.")
-
     show_packets = [packet_to_dict(p) for p in packets]  # Convert packets to dicts for JSON serialization
     summary_packets = [str(p) for p in packets]  # Summarize packets for quick analysis
 
@@ -42,6 +46,7 @@ def packet_to_dict(pkt):
     index += 1
     data = {}
     layer = pkt
+    print(pkt.summary())
     while layer:
         # Get the layer name (e.g., 'IP', 'TCP')
         layer_name = layer.name

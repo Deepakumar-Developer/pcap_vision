@@ -23,8 +23,8 @@ def get_osi(pcap_file, type):
     
     packets = rdpcap(fileData)
 
-    if len(packets) > 1000:
-        raise ValueError(f"File too large: {len(packets)} packets. Maximum allowed is 1000.")
+    if len(packets) > 2000:
+        raise ValueError(f"File too large: {len(packets)} packets. Maximum allowed is 2000.")
     
     if len(packets) > 0:
         first_packet = packets[0]
